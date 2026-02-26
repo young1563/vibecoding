@@ -14,6 +14,54 @@
 
 <body>
     <div id="gameContainer">
+        <!-- Start Screen (Lobby) -->
+        <div id="startScreen" class="screen">
+            <div class="logo-area">
+                <div class="badge-mini">PD CASE #2026</div>
+                <h1>ZOOTOPIA <span class="highlight">2</span></h1>
+                <p class="subtitle">MAHJONG MASTER • URBAN ADVENTURE</p>
+            </div>
+
+            <div class="character-preview">
+                <div class="char-card judy">
+                    <span class="emoji">🐰</span>
+                    <span class="name">JUDY HOPS</span>
+                </div>
+                <div class="char-card nick">
+                    <span class="emoji">🦊</span>
+                    <span class="name">NICK WILDE</span>
+                </div>
+            </div>
+
+            <div class="menu-actions">
+                <button id="startGameBtn" class="main-btn">
+                    <i class="fas fa-play"></i> 수사 시작하기 (START)
+                </button>
+                <div class="sub-actions">
+                    <button class="icon-btn-small" id="showRankingBtn" title="순위표"><i
+                            class="fas fa-trophy"></i></button>
+                    <button class="icon-btn-small" title="설정"><i class="fas fa-cog"></i></button>
+                    <button class="icon-btn-small" title="도움말"><i class="fas fa-question"></i></button>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                <p>본 게임은 비타 마작 스타일의 솔리테어 퍼즐입니다.</p>
+            </div>
+        </div>
+
+        <!-- Ranking Screen -->
+        <div id="rankingScreen" class="screen hidden">
+            <div class="ranking-header">
+                <h2>🏆 주토피아 명예 전당</h2>
+                <button class="close-btn" id="closeRankingBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="ranking-list" id="rankingList">
+                <!-- Rankings will be loaded here -->
+                <div class="loading">수사 기록을 불러오는 중...</div>
+            </div>
+        </div>
+
         <!-- Header -->
         <header class="game-header">
             <div class="stage-info">
@@ -25,10 +73,6 @@
                 <div class="score-display">
                     <i class="fas fa-star"></i>
                     <span id="scoreValue">0</span>
-                </div>
-                <div class="time-display">
-                    <i class="fas fa-clock"></i>
-                    <span id="timerValue">05:00</span>
                 </div>
             </div>
 
@@ -69,7 +113,10 @@
         </footer>
     </div>
 
-    <!-- Scripts -->
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="mahjong-game.js"></script>
 </body>
 

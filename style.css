@@ -49,23 +49,184 @@ body {
     z-index: 1;
 }
 
-/* Background Decoration */
-#gameContainer::before {
-    content: "🐰🦊";
+/* Screen Management */
+.screen {
     position: absolute;
-    top: -20px;
-    right: 40px;
-    font-size: 5rem;
-    opacity: 0.1;
-    z-index: -1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    background-image:
+        radial-gradient(circle at 10% 10%, rgba(255, 159, 28, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 90%, rgba(46, 196, 182, 0.05) 0%, transparent 20%);
+    transition: all 0.5s ease;
+    border-radius: 40px;
 }
 
-/* Header */
-.game-header {
+.screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.1);
+}
+
+/* Start Screen (Lobby) UI */
+#startScreen {
+    padding: 4rem;
+    text-align: center;
+}
+
+.logo-area {
+    margin-bottom: 3rem;
+}
+
+.logo-area .badge-mini {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: var(--text-dark);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border-radius: 6px;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.logo-area h1 {
+    font-size: 4.5rem;
+    color: var(--text-dark);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.logo-area h1 .highlight {
+    color: var(--primary-color);
+}
+
+.logo-area .subtitle {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.character-preview {
     display: flex;
-    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.char-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    transition: transform 0.3s;
+    border: 2px solid transparent;
+}
+
+.char-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--secondary-color);
+}
+
+.char-card .emoji {
+    font-size: 4rem;
+}
+
+.char-card .name {
+    font-weight: 800;
+    color: #666;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 350px;
+}
+
+.main-btn {
+    padding: 1.5rem 2rem;
+    border-radius: 20px;
+    background: var(--gradient-urban);
+    color: white;
+    border: none;
+    font-size: 1.4rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(255, 159, 28, 0.4);
+    animation: pulseBtn 2s infinite;
+    transition: all 0.2s;
+}
+
+.main-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(255, 159, 28, 0.6);
+}
+
+.sub-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.icon-btn-small {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: #F1F3F5;
+    border: none;
+    color: #666;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-btn-small:hover {
+    background: #E9ECEF;
+    color: var(--text-dark);
+}
+
+.footer-note {
+    margin-top: 3rem;
+    font-size: 0.8rem;
+    color: #999;
+}
+
+@keyframes pulseBtn {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Header (moved logic) */
+.game-header {
+    transition: opacity 0.5s;
+}
+
+.game-header.hidden {
+    opacity: 0;
 }
 
 .stage-info {
@@ -235,6 +396,111 @@ body {
     justify-content: space-between;
     align-items: flex-end;
     margin-top: 1rem;
+    transition: opacity 0.5s;
+}
+
+.game-footer.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mahjong-area.hidden {
+    display: none;
+}
+
+/* Ranking Screen UI */
+#rankingScreen {
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.ranking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2rem;
+}
+
+.ranking-header h2 {
+    font-size: 2rem;
+    color: var(--text-dark);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: var(--accent-color);
+}
+
+.ranking-list {
+    width: 100%;
+    max-width: 600px;
+    height: 60vh;
+    overflow-y: auto;
+    padding-right: 1rem;
+}
+
+.ranking-entry {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 80px;
+    align-items: center;
+    padding: 1.2rem;
+    background: white;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid #F1F3F5;
+    transition: transform 0.2s;
+}
+
+.ranking-entry:hover {
+    transform: scale(1.02);
+    border-color: var(--secondary-color);
+}
+
+.ranking-entry .rank {
+    font-weight: 800;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.ranking-entry .name {
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.ranking-entry .score {
+    font-weight: 800;
+    color: var(--secondary-color);
+    text-align: right;
+}
+
+.ranking-entry .stage {
+    font-weight: 600;
+    color: #999;
+    text-align: right;
+    font-size: 0.8rem;
+}
+
+.loading,
+.error {
+    padding: 3rem;
+    text-align: center;
+    color: #999;
+    font-weight: 600;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .item-bar {
