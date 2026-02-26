@@ -24,6 +24,7 @@ class MahjongGame {
         this.tiles = [];
         this.collector = []; // Tiles in slots
         this.collectorSize = 4;
+        this.bombCount = 1; // New: Initialize bomb count
 
         this.tileSymbols = [
             '🐰', '🦊', '👮', '🥕', '🍩', '🚔', '🦥', '🦁',
@@ -118,9 +119,9 @@ class MahjongGame {
         const containerW = this.boardElement.clientWidth || 800;
         const containerH = this.boardElement.clientHeight || 500;
 
-        // Calculate Scale to fit
-        const scaleX = (containerW * 0.9) / boardW;
-        const scaleY = (containerH * 0.9) / boardH;
+        // Calculate Scale to fit (Increased coverage to 96%)
+        const scaleX = (containerW * 0.96) / boardW;
+        const scaleY = (containerH * 0.96) / boardH;
         const finalScale = Math.min(scaleX, scaleY, 1); // Never scale up
 
         // Center offsets
@@ -327,6 +328,23 @@ class MahjongGame {
         }, 1000);
     }
 
+    useBomb() {
+        if (this.bombCount <= 0) {
+            this.sayMsg("주디", "폭탄이 더 이상 없어!");
+            return;
+        }
+        if (this.collector.length === 0) {
+            this.sayMsg("닉", "보관함이 비어 있는데 폭탄을 쓸 필요는 없지.");
+            return;
+        }
+
+        this.bombCount--;
+        this.collector = [];
+        this.renderCollector();
+        this.updateUI();
+        this.sayMsg("주디", "펑! 보관함을 깨끗하게 비웠어. 다시 시작해봐!");
+    }
+
     saveScore() {
         if (typeof database !== 'undefined') {
             const userName = localStorage.getItem('zootopia_user_name') || "무명 수사관";
@@ -362,6 +380,7 @@ class MahjongGame {
         document.getElementById('closeRankingBtn').onclick = () => this.rankingScreen.classList.add('hidden');
         document.getElementById('shuffleBtn').onclick = () => { this.createStage(); this.sayMsg("닉", "재배치 완료! 이제 좀 보이려나?"); };
         document.getElementById('hintBtn').onclick = () => this.showHint();
+        document.getElementById('bombBtn').onclick = () => this.useBomb();
     }
 
     showHint() {
@@ -388,6 +407,7 @@ class MahjongGame {
     updateUI() {
         this.stageText.innerText = this.stage;
         this.scoreText.innerText = this.score.toLocaleString();
+        document.getElementById('bombCount').innerText = this.bombCount;
     }
 
     sayMsg(char, text) {

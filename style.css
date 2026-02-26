@@ -42,7 +42,8 @@ body {
     border-radius: 40px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
     border: 2px solid white;
-    padding: 1rem;
+    padding: 0.8rem;
+    /* Tightened */
     display: flex;
     flex-direction: column;
     position: relative;
@@ -223,6 +224,12 @@ body {
 
 /* Header (moved logic) */
 .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.2rem;
+    /* Radically reduced */
+    padding: 0 1rem;
     transition: opacity 0.5s;
 }
 
@@ -233,20 +240,21 @@ body {
 .stage-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .level-badge {
     background: var(--gradient-urban);
     color: white;
-    padding: 0.4rem 1rem;
+    padding: 0.1rem 0.4rem;
     border-radius: 12px;
     font-weight: 800;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
 }
 
 #currentStage {
-    font-size: 3rem;
+    font-size: 1.8rem;
+    /* Scaled down */
     color: var(--primary-color);
 }
 
@@ -312,11 +320,12 @@ body {
 /* Collector Bar Style */
 #collectorContainer {
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
+    /* Further reduced */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.1rem;
     transition: all 0.5s;
 }
 
@@ -373,7 +382,8 @@ body {
     border-radius: 24px;
     position: relative;
     overflow: visible;
-    margin: 0.5rem 0;
+    margin: 0;
+    /* Removed margin */
     min-height: 0;
 }
 
@@ -447,6 +457,44 @@ body {
         box-shadow: 0 0 30px var(--primary-color);
         transform: scale(1.05);
     }
+}
+
+/* Utility Buttons (Bomb, etc) */
+.icon-btn-util {
+    background: white;
+    border: 2px solid #EEE;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    margin-left: 0.5rem;
+}
+
+.bomb-btn {
+    color: #E71D36;
+    border-color: #ffdce0;
+}
+
+.bomb-btn:hover {
+    background: #E71D3610;
+    transform: scale(1.1);
+}
+
+.icon-btn-util .count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent-color);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 800;
 }
 
 /* Footer Section */
