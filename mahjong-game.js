@@ -58,6 +58,22 @@ class MahjongGame {
         this.sayMsg("주디", "상단 보관함에 4개가 꽉 차면 안 돼! 신중하게 골라줘.");
     }
 
+    goHome() {
+        if (confirm("수사를 중단하고 본부(홈)로 돌아가시겠습니까? 현재 진행 상황은 저장되지 않습니다.")) {
+            this.startScreen.classList.remove('hidden');
+            this.gameHeader.classList.add('hidden');
+            this.gameFooter.classList.add('hidden');
+            this.mahjongArea.classList.add('hidden');
+            this.collectorContainer.classList.add('hidden');
+
+            // Optional: reset game state
+            this.stage = 1;
+            this.score = 0;
+            this.bombCount = 1;
+            this.updateUI();
+        }
+    }
+
     createStage() {
         this.boardElement.innerHTML = '';
         this.tiles = [];
@@ -358,18 +374,43 @@ class MahjongGame {
 
     loadRankings() {
         this.rankingList.innerHTML = '<div class="loading">수사 기록을 불러오는 중...</div>';
-        if (typeof database !== 'undefined') {
-            database.ref('rankings').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-                this.rankingList.innerHTML = '';
-                const data = [];
-                snapshot.forEach(child => { data.push({ name: child.key, ...child.val() }); });
-                data.reverse().forEach((item, index) => {
-                    const entry = document.createElement('div');
-                    entry.className = 'ranking-entry';
-                    entry.innerHTML = `<span class="rank">#${index + 1}</span><span class="name">${item.name}</span><span class="score">${item.score.toLocaleString()}</span><span class="stage">ST.${item.stage}</span>`;
-                    this.rankingList.appendChild(entry);
+
+        // Check if database is initialized and has a valid URL
+        const isFirebaseValid = typeof database !== 'undefined' &&
+            database.app.options.databaseURL &&
+            database.app.options.databaseURL !== "YOUR_DATABASE_URL";
+
+        if (isFirebaseValid) {
+            database.ref('rankings').orderByChild('score').limitToLast(10).once('value')
+                .then((snapshot) => {
+                    this.rankingList.innerHTML = '';
+                    const data = [];
+                    snapshot.forEach(child => { data.push({ name: child.key, ...child.val() }); });
+
+                    if (data.length === 0) {
+                        this.rankingList.innerHTML = '<div class="empty">아직 등록된 수사 기록이 없습니다.</div>';
+                        return;
+                    }
+
+                    data.reverse().forEach((item, index) => {
+                        const entry = document.createElement('div');
+                        entry.className = 'ranking-entry';
+                        entry.innerHTML = `<span class="rank">#${index + 1}</span><span class="name">${item.name}</span><span class="score">${item.score.toLocaleString()}</span><span class="stage">ST.${item.stage}</span>`;
+                        this.rankingList.appendChild(entry);
+                    });
+                })
+                .catch((err) => {
+                    console.error("Firebase load error:", err);
+                    this.rankingList.innerHTML = '<div class="error">데이터를 불러오는 데 실패했습니다.</div>';
                 });
-            });
+        } else {
+            // Fallback for local testing if Firebase is not set up
+            this.rankingList.innerHTML = `
+                <div class="error">
+                    <p style="margin-bottom: 0.5rem">Firebase 설정이 필요합니다.</p>
+                    <small style="color: #666">firebase-config.js 파일에 실제 API 정보를 입력해주세요.</small>
+                </div>`;
+            console.warn("Firebase not configured properly. Check firebase-config.js");
         }
     }
 
@@ -381,6 +422,7 @@ class MahjongGame {
         document.getElementById('shuffleBtn').onclick = () => { this.createStage(); this.sayMsg("닉", "재배치 완료! 이제 좀 보이려나?"); };
         document.getElementById('hintBtn').onclick = () => this.showHint();
         document.getElementById('bombBtn').onclick = () => this.useBomb();
+        document.getElementById('homeBtn').onclick = () => this.goHome();
     }
 
     showHint() {

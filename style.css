@@ -195,6 +195,17 @@ body {
     font-size: 1.3rem;
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-header .icon-btn-small {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    margin-right: 0.5rem;
 }
 
 .icon-btn-small:hover {
