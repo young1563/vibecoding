@@ -1,6 +1,6 @@
 /**
  * Zootopia 2: Mahjong Master - Core Game Logic
- * Updated: Removed time limit, added Firebase Ranking System.
+ * Updated: Collector Slot System (4 Slots), Match-2 in Slot.
  */
 class MahjongGame {
     constructor() {
@@ -16,11 +16,15 @@ class MahjongGame {
         this.gameHeader = document.querySelector('.game-header');
         this.gameFooter = document.querySelector('.game-footer');
         this.mahjongArea = document.querySelector('.mahjong-area');
+        this.collectorContainer = document.getElementById('collectorContainer');
+        this.collectorBar = document.getElementById('collectorBar');
 
         this.stage = 1;
         this.score = 0;
-        this.selectedTile = null;
         this.tiles = [];
+        this.collector = []; // Tiles in slots
+        this.collectorSize = 4;
+
         this.tileSymbols = [
             '🐰', '🦊', '👮', '🥕', '🍩', '🚔', '🦥', '🦁',
             '🐯', '⚖️', '⛓️', '🚨', '📻', '📢', '🏙️', '🍎',
@@ -34,6 +38,7 @@ class MahjongGame {
         this.gameHeader.classList.add('hidden');
         this.gameFooter.classList.add('hidden');
         this.mahjongArea.classList.add('hidden');
+        this.collectorContainer.classList.add('hidden');
 
         this.setupControls();
         this.updateUI();
@@ -44,15 +49,19 @@ class MahjongGame {
         this.gameHeader.classList.remove('hidden');
         this.gameFooter.classList.remove('hidden');
         this.mahjongArea.classList.remove('hidden');
+        this.collectorContainer.classList.remove('hidden');
 
+        this.collector = [];
+        this.renderCollector();
         this.createStage();
-        this.sayMsg("주디", "시간 제한이 없으니 차근차근 해결해보자고!");
+        this.sayMsg("주디", "상단 보관함에 4개가 꽉 차면 안 돼! 신중하게 골라줘.");
     }
 
     createStage() {
         this.boardElement.innerHTML = '';
         this.tiles = [];
-        this.selectedTile = null;
+        this.collector = [];
+        this.renderCollector();
 
         const pairCount = Math.min(20 + this.stage * 10, 72);
         const layoutSymbols = [];
@@ -68,111 +77,201 @@ class MahjongGame {
 
     generateLayout(symbols) {
         let symIdx = 0;
-        const layers = Math.min(3 + Math.floor(this.stage / 2), 5);
-        const gridW = 10;
-        const gridH = 8;
+        const layers = Math.min(3 + Math.floor(this.stage / 2), 4);
         const tileW = 50;
         const tileH = 70;
 
-        const centerX = this.boardElement.clientWidth / 2;
-        const centerY = this.boardElement.clientHeight / 2;
+        // Define board coordinate space (internal)
+        // We'll calculate the bounds first
+        const layoutData = [];
+        let minX = 999, maxX = -999, minY = 999, maxY = -999;
 
         for (let z = 0; z < layers; z++) {
             const rowCount = 6 - z;
             const colCount = 8 - z;
-
             for (let r = 0; r < rowCount; r++) {
                 for (let c = 0; c < colCount; c++) {
                     if (symIdx >= symbols.length) break;
-
                     if (Math.random() > 0.1 + (z * 0.1)) {
-                        const tile = document.createElement('div');
-                        tile.classList.add('tile');
-                        tile.innerText = symbols[symIdx++];
+                        const posX = (c * tileW) - (z * 8);
+                        const posY = (r * tileH) - (z * 8);
 
-                        const x = centerX - (colCount * tileW / 2) + (c * tileW) - (z * 5);
-                        const y = centerY - (rowCount * tileH / 2) + (r * tileH) - (z * 5);
+                        minX = Math.min(minX, posX);
+                        maxX = Math.max(maxX, posX + tileW);
+                        minY = Math.min(minY, posY);
+                        maxY = Math.max(maxY, posY + tileH);
 
-                        tile.style.left = `${x}px`;
-                        tile.style.top = `${y}px`;
-                        tile.style.zIndex = z * 10;
-
-                        const tileData = {
-                            element: tile,
-                            x: c, y: r, z: z,
-                            symbol: tile.innerText,
-                            removed: false
-                        };
-
-                        tile.onclick = () => this.handleTileClick(tileData);
-                        this.boardElement.appendChild(tile);
-                        this.tiles.push(tileData);
+                        layoutData.push({ symbol: symbols[symIdx++], x: posX, y: posY, z: z });
                     }
                 }
-                if (symIdx >= symbols.length) break;
             }
         }
+
+        const boardW = maxX - minX;
+        const boardH = maxY - minY;
+        const containerW = this.boardElement.clientWidth || 800;
+        const containerH = this.boardElement.clientHeight || 500;
+
+        // Calculate Scale to fit
+        const scaleX = (containerW * 0.9) / boardW;
+        const scaleY = (containerH * 0.9) / boardH;
+        const finalScale = Math.min(scaleX, scaleY, 1); // Never scale up
+
+        // Center offsets
+        const offsetX = (containerW - (boardW * finalScale)) / 2 - (minX * finalScale);
+        const offsetY = (containerH - (boardH * finalScale)) / 2 - (minY * finalScale);
+
+        layoutData.forEach(data => {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.innerText = data.symbol;
+
+            // Apply scale and position
+            tile.style.left = `${(data.x * finalScale) + offsetX}px`;
+            tile.style.top = `${(data.y * finalScale) + offsetY}px`;
+            tile.style.width = `${tileW * finalScale}px`;
+            tile.style.height = `${tileH * finalScale}px`;
+            tile.style.fontSize = `${1.8 * finalScale}rem`;
+            tile.style.zIndex = data.z * 10;
+
+            const tileData = { element: tile, symbol: data.symbol, z: data.z, removed: false };
+            tile.onclick = () => this.handleTileClick(tileData);
+            this.boardElement.appendChild(tile);
+            this.tiles.push(tileData);
+        });
     }
 
     handleTileClick(tile) {
-        if (this.isBlocked(tile) || tile.removed) return;
+        if (this.isBlocked(tile) || tile.removed || this.collector.length >= this.collectorSize) return;
 
-        if (this.selectedTile === null) {
-            this.selectedTile = tile;
-            tile.element.classList.add('selected');
-        } else if (this.selectedTile === tile) {
-            tile.element.classList.remove('selected');
-            this.selectedTile = null;
-        } else {
-            if (this.selectedTile.symbol === tile.symbol) {
-                this.removeTiles(this.selectedTile, tile);
-                this.selectedTile = null;
-                this.score += 100 * this.stage;
+        // Move to collector
+        tile.removed = true;
+        tile.element.style.pointerEvents = "none";
+        this.collector.push(tile);
+
+        // Remove from board visually (or move to collector visual)
+        tile.element.style.transition = "all 0.5s ease";
+        tile.element.style.opacity = "0";
+        tile.element.style.transform = "translateY(-200px) scale(0.5)";
+
+        setTimeout(() => {
+            this.renderCollector();
+            this.checkMatches();
+            this.checkBlockedStatus();
+            this.checkClear();
+        }, 500);
+    }
+
+    renderCollector() {
+        this.collectorBar.innerHTML = '';
+        const currentCount = this.collector.length;
+
+        // Fill existing tiles
+        this.collector.forEach(tile => {
+            const clone = document.createElement('div');
+            clone.className = 'tile';
+            clone.innerText = tile.symbol;
+            this.collectorBar.appendChild(clone);
+        });
+
+        // Fill empty slots
+        for (let i = 0; i < this.collectorSize - currentCount; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'slot-empty';
+            this.collectorBar.appendChild(empty);
+        }
+    }
+
+    checkMatches() {
+        // Simple Match-2 logic
+        const counts = {};
+        this.collector.forEach(t => counts[t.symbol] = (counts[t.symbol] || 0) + 1);
+
+        for (let sym in counts) {
+            if (counts[sym] >= 2) {
+                // Remove the pair from collector
+                let removedCount = 0;
+                this.collector = this.collector.filter(t => {
+                    if (t.symbol === sym && removedCount < 2) {
+                        removedCount++;
+                        return false;
+                    }
+                    return true;
+                });
+
+                this.score += 200 * this.stage;
                 this.updateUI();
-                this.checkBlockedStatus();
-                this.checkClear();
-            } else {
-                this.selectedTile.element.classList.remove('selected');
-                this.selectedTile = tile;
-                tile.element.classList.add('selected');
+                this.sayMsg("주디", "빙고! 증거물 매칭 성공!");
+
+                // Re-render and break to check more if needed
+                setTimeout(() => this.renderCollector(), 100);
+            }
+        }
+
+        // Check for Game Over
+        if (this.collector.length >= this.collectorSize) {
+            // Check if any match is still possible after rendering (redundant but safe)
+            const remainingCounts = {};
+            this.collector.forEach(t => remainingCounts[t.symbol] = (remainingCounts[t.symbol] || 0) + 1);
+            let matchExists = false;
+            for (let s in remainingCounts) if (remainingCounts[s] >= 2) matchExists = true;
+
+            if (!matchExists) {
+                this.gameOver();
             }
         }
     }
 
-    removeTiles(t1, t2) {
-        t1.removed = true;
-        t2.removed = true;
-        t1.element.style.transform = 'scale(0) rotate(180deg)';
-        t1.element.style.opacity = '0';
-        t2.element.style.transform = 'scale(0) rotate(-180deg)';
-        t2.element.style.opacity = '0';
-
-        setTimeout(() => {
-            t1.element.remove();
-            t2.element.remove();
-        }, 300);
-    }
-
     isBlocked(tile) {
-        const onTop = this.tiles.some(other => {
-            if (other.removed || other.z <= tile.z) return false;
-            const dx = Math.abs(parseFloat(other.element.style.left) - parseFloat(tile.element.style.left));
-            const dy = Math.abs(parseFloat(other.element.style.top) - parseFloat(tile.element.style.top));
-            return dx < 30 && dy < 40;
-        });
-        if (onTop) return true;
+        if (tile.removed) return false;
 
+        const x1 = parseFloat(tile.element.style.left);
+        const y1 = parseFloat(tile.element.style.top);
+        const w1 = parseFloat(tile.element.style.width);
+        const h1 = parseFloat(tile.element.style.height);
+
+        // 1. Check On Top (Any tile with higher Z that overlaps at all)
+        for (const other of this.tiles) {
+            if (other.removed || other.z <= tile.z || other === tile) continue;
+
+            const x2 = parseFloat(other.element.style.left);
+            const y2 = parseFloat(other.element.style.top);
+            const w2 = parseFloat(other.element.style.width);
+            const h2 = parseFloat(other.element.style.height);
+
+            // Geometric Intersection Check
+            const xOverlap = Math.max(0, Math.min(x1 + w1, x2 + w2) - Math.max(x1, x2));
+            const yOverlap = Math.max(0, Math.min(y1 + h1, y2 + h2) - Math.max(y1, y2));
+
+            // Blocked if there's any significant overlap (> 10% of tile area)
+            if (xOverlap > 5 && yOverlap > 5) {
+                return true;
+            }
+        }
+
+        // 2. Check Left & Right at same level
         let leftBlocked = false;
         let rightBlocked = false;
-        this.tiles.forEach(other => {
-            if (other.removed || other.z !== tile.z) return;
-            const dx = parseFloat(other.element.style.left) - parseFloat(tile.element.style.left);
-            const dy = Math.abs(parseFloat(other.element.style.top) - parseFloat(tile.element.style.top));
-            if (dy < 40) {
-                if (dx >= 40 && dx <= 60) rightBlocked = true;
-                if (dx <= -40 && dx >= -60) leftBlocked = true;
+
+        for (const other of this.tiles) {
+            if (other.removed || other.z !== tile.z || other === tile) continue;
+
+            const x2 = parseFloat(other.element.style.left);
+            const y2 = parseFloat(other.element.style.top);
+            const w2 = parseFloat(other.element.style.width);
+            const h2 = parseFloat(other.element.style.height);
+
+            const yOverlap = Math.max(0, Math.min(y1 + h1, y2 + h2) - Math.max(y1, y2));
+
+            if (yOverlap > h1 * 0.2) { // Signficant vertical overlap
+                const dx = x2 - x1;
+                // If other tile is to the right
+                if (dx > w1 * 0.1 && dx < w1 * 1.1) rightBlocked = true;
+                // If other tile is to the left
+                if (dx < -w1 * 0.1 && dx > -w1 * 1.1) leftBlocked = true;
             }
-        });
+        }
+
         return leftBlocked && rightBlocked;
     }
 
@@ -184,15 +283,22 @@ class MahjongGame {
     }
 
     checkClear() {
-        if (this.tiles.every(t => t.removed)) {
-            this.saveScore(); // Save to ranking after each stage clear
+        if (this.tiles.every(t => t.removed) && this.collector.length === 0) {
+            this.saveScore();
             this.stage++;
-            this.sayMsg("닉", "정말 대단해! 다음 구역 수사 기록도 남겨놨어.");
+            this.sayMsg("닉", "완벽한 수사야! 다음 구역으로 가보자고.");
             setTimeout(() => this.createStage(), 1500);
         }
     }
 
-    // --- Firebase Ranking Logic ---
+    gameOver() {
+        this.sayMsg("닉", "보관함이 꽉 찼어. 이번 사건은 여기까지인 것 같네.");
+        setTimeout(() => {
+            alert(`수사 실패! 최종 스코어: ${this.score}`);
+            location.reload();
+        }, 1000);
+    }
+
     saveScore() {
         if (typeof database !== 'undefined') {
             const userName = localStorage.getItem('zootopia_user_name') || "무명 수사관";
@@ -210,54 +316,30 @@ class MahjongGame {
             database.ref('rankings').orderByChild('score').limitToLast(10).once('value', (snapshot) => {
                 this.rankingList.innerHTML = '';
                 const data = [];
-                snapshot.forEach(child => {
-                    data.push({ name: child.key, ...child.val() });
-                });
+                snapshot.forEach(child => { data.push({ name: child.key, ...child.val() }); });
                 data.reverse().forEach((item, index) => {
                     const entry = document.createElement('div');
                     entry.className = 'ranking-entry';
-                    entry.innerHTML = `
-                        <span class="rank">#${index + 1}</span>
-                        <span class="name">${item.name}</span>
-                        <span class="score">${item.score.toLocaleString()}</span>
-                        <span class="stage">ST.${item.stage}</span>
-                    `;
+                    entry.innerHTML = `<span class="rank">#${index + 1}</span><span class="name">${item.name}</span><span class="score">${item.score.toLocaleString()}</span><span class="stage">ST.${item.stage}</span>`;
                     this.rankingList.appendChild(entry);
                 });
             });
-        } else {
-            this.rankingList.innerHTML = '<div class="error">Firebase 설정이 필요합니다.</div>';
         }
     }
 
     setupControls() {
         const startBtn = document.getElementById('startGameBtn');
         if (startBtn) startBtn.onclick = () => this.startGame();
-
-        document.getElementById('showRankingBtn').onclick = () => {
-            this.rankingScreen.classList.remove('hidden');
-            this.loadRankings();
-        };
-
-        document.getElementById('closeRankingBtn').onclick = () => {
-            this.rankingScreen.classList.add('hidden');
-        };
-
-        document.getElementById('shuffleBtn').onclick = () => {
-            this.createStage();
-            this.sayMsg("닉", "좀 어지러워 보이길래 내가 좀 섞어봤어.");
-        };
-
+        document.getElementById('showRankingBtn').onclick = () => { this.rankingScreen.classList.remove('hidden'); this.loadRankings(); };
+        document.getElementById('closeRankingBtn').onclick = () => this.rankingScreen.classList.add('hidden');
+        document.getElementById('shuffleBtn').onclick = () => { this.createStage(); this.sayMsg("닉", "재배치 완료! 이제 좀 보이려나?"); };
         document.getElementById('hintBtn').onclick = () => this.showHint();
     }
 
     showHint() {
         const selectables = this.tiles.filter(t => !t.removed && !this.isBlocked(t));
         const pairs = {};
-        for (let t of selectables) {
-            if (!pairs[t.symbol]) pairs[t.symbol] = [];
-            pairs[t.symbol].push(t);
-        }
+        for (let t of selectables) { if (!pairs[t.symbol]) pairs[t.symbol] = []; pairs[t.symbol].push(t); }
         for (let sym in pairs) {
             if (pairs[sym].length >= 2) {
                 const pair = pairs[sym].slice(0, 2);
@@ -288,9 +370,8 @@ class MahjongGame {
 
 window.addEventListener('load', () => {
     window.game = new MahjongGame();
-    // Prompt for username if not set
     if (!localStorage.getItem('zootopia_user_name')) {
-        const name = prompt("본인 확인이 필요합니다. 수사관님의 성함은 무엇인가요?", "주디 홉스");
+        const name = prompt("수사관님의 성명을 입력해주세요.", "주디 홉스");
         if (name) localStorage.setItem('zootopia_user_name', name);
     }
 });
