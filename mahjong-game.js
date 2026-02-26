@@ -89,12 +89,18 @@ class MahjongGame {
         for (let z = 0; z < layers; z++) {
             const rowCount = 6 - z;
             const colCount = 8 - z;
+
+            // Apply half-tile offset for each layer to create staggering
+            const layerOffsetX = z * (tileW / 2);
+            const layerOffsetY = z * (tileH / 2);
+
             for (let r = 0; r < rowCount; r++) {
                 for (let c = 0; c < colCount; c++) {
                     if (symIdx >= symbols.length) break;
                     if (Math.random() > 0.1 + (z * 0.1)) {
-                        const posX = (c * tileW) - (z * 8);
-                        const posY = (r * tileH) - (z * 8);
+                        // Staggered positioning
+                        const posX = (c * tileW) + layerOffsetX;
+                        const posY = (r * tileH) + layerOffsetY;
 
                         minX = Math.min(minX, posX);
                         maxX = Math.max(maxX, posX + tileW);
