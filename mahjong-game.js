@@ -19,6 +19,11 @@ class MahjongGame {
         this.collectorContainer = document.getElementById('collectorContainer');
         this.collectorBar = document.getElementById('collectorBar');
 
+        // Game Over Modal Elements
+        this.gameOverModal = document.getElementById('gameOverModal');
+        this.finalScoreText = document.getElementById('finalScore');
+        this.finalStageText = document.getElementById('finalStage');
+
         this.stage = 1;
         this.score = 0;
         this.tiles = [];
@@ -106,28 +111,27 @@ class MahjongGame {
         for (let z = 0; z < layers; z++) {
             const rowCount = 6 - z;
             const colCount = 8 - z;
-
-            // Apply half-tile offset for each layer to create staggering
             const layerOffsetX = z * (tileW / 2);
             const layerOffsetY = z * (tileH / 2);
 
             for (let r = 0; r < rowCount; r++) {
                 for (let c = 0; c < colCount; c++) {
                     if (symIdx >= symbols.length) break;
-                    if (Math.random() > 0.1 + (z * 0.1)) {
-                        // Staggered positioning
-                        const posX = (c * tileW) + layerOffsetX;
-                        const posY = (r * tileH) + layerOffsetY;
 
-                        minX = Math.min(minX, posX);
-                        maxX = Math.max(maxX, posX + tileW);
-                        minY = Math.min(minY, posY);
-                        maxY = Math.max(maxY, posY + tileH);
+                    // Controlled density: Ensure we use slots but don't skip symbols
+                    const posX = (c * tileW) + layerOffsetX;
+                    const posY = (r * tileH) + layerOffsetY;
 
-                        layoutData.push({ symbol: symbols[symIdx++], x: posX, y: posY, z: z });
-                    }
+                    minX = Math.min(minX, posX);
+                    maxX = Math.max(maxX, posX + tileW);
+                    minY = Math.min(minY, posY);
+                    maxY = Math.max(maxY, posY + tileH);
+
+                    layoutData.push({ symbol: symbols[symIdx++], x: posX, y: posY, z: z });
                 }
+                if (symIdx >= symbols.length) break;
             }
+            if (symIdx >= symbols.length) break;
         }
 
         const boardW = maxX - minX;
@@ -248,12 +252,23 @@ class MahjongGame {
                 this.updateUI();
                 this.sayMsg("주디", "빙고! 증거물 매칭 성공!");
 
+                // Visual Feedback
+                this.collectorBar.classList.add('match-flash');
+                setTimeout(() => this.collectorBar.classList.remove('match-flash'), 500);
+
+                const rect = this.collectorBar.getBoundingClientRect();
+                this.showFloatingScore(`+${200 * this.stage}`, rect.left + rect.width / 2, rect.top);
+
                 // Re-render and break to check more if needed
-                setTimeout(() => this.renderCollector(), 100);
+                setTimeout(() => {
+                    this.renderCollector();
+                    this.checkClear(); // Check clear AFTER matching
+                }, 100);
+                return; // Restart check loop
             }
         }
 
-        // Check for Game Over
+        // Check for Game Over (only if no matches were processed this frame)
         if (this.collector.length >= this.collectorSize) {
             // Check if any match is still possible after rendering (redundant but safe)
             const remainingCounts = {};
@@ -328,20 +343,39 @@ class MahjongGame {
     }
 
     checkClear() {
-        if (this.tiles.every(t => t.removed) && this.collector.length === 0) {
+        const remainingOnBoard = this.tiles.filter(t => !t.removed).length;
+        console.log(`Checking clear: ${remainingOnBoard} tiles left on board, ${this.collector.length} in collector`);
+
+        if (remainingOnBoard === 0 && this.collector.length === 0) {
             this.saveScore();
             this.stage++;
-            this.sayMsg("닉", "완벽한 수사야! 다음 구역으로 가보자고.");
-            setTimeout(() => this.createStage(), 1500);
+            this.sayMsg("주디", "와! 정말 대단해! 모든 증거를 수집했어.");
+            setTimeout(() => {
+                this.sayMsg("닉", "기다려봐, 다음 사건 구역이 열리고 있으니까.");
+                this.createStage();
+                this.updateUI();
+            }, 1000);
         }
     }
 
     gameOver() {
         this.sayMsg("닉", "보관함이 꽉 찼어. 이번 사건은 여기까지인 것 같네.");
-        setTimeout(() => {
-            alert(`수사 실패! 최종 스코어: ${this.score}`);
-            location.reload();
-        }, 1000);
+
+        // Populate and show Modal
+        this.finalScoreText.innerText = this.score.toLocaleString();
+        this.finalStageText.innerText = this.stage;
+        this.gameOverModal.classList.remove('hidden');
+    }
+
+    restartGame() {
+        this.gameOverModal.classList.add('hidden');
+        this.stage = 1;
+        this.score = 0;
+        this.bombCount = 1;
+        this.collector = [];
+        this.updateUI();
+        this.renderCollector();
+        this.createStage();
     }
 
     useBomb() {
@@ -423,6 +457,13 @@ class MahjongGame {
         document.getElementById('hintBtn').onclick = () => this.showHint();
         document.getElementById('bombBtn').onclick = () => this.useBomb();
         document.getElementById('homeBtn').onclick = () => this.goHome();
+
+        // Modal Buttons
+        document.getElementById('restartGameBtn').onclick = () => this.restartGame();
+        document.getElementById('modalHomeBtn').onclick = () => {
+            this.gameOverModal.classList.add('hidden');
+            this.goHome();
+        };
     }
 
     showHint() {
@@ -450,6 +491,16 @@ class MahjongGame {
         this.stageText.innerText = this.stage;
         this.scoreText.innerText = this.score.toLocaleString();
         document.getElementById('bombCount').innerText = this.bombCount;
+    }
+
+    showFloatingScore(text, x, y) {
+        const el = document.createElement('div');
+        el.className = 'floating-score';
+        el.innerText = text;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 800);
     }
 
     sayMsg(char, text) {
