@@ -30,6 +30,7 @@ class MahjongGame {
         this.collector = []; // Tiles in slots
         this.collectorSize = 4;
         this.bombCount = 1; // New: Initialize bomb count
+        this.hintCount = 3; // New: Initialize hint count
 
         this.tileSymbols = [
             '🐰', '🦊', '👮', '🥕', '🍩', '🚔', '🦥', '🦁',
@@ -372,6 +373,7 @@ class MahjongGame {
         this.stage = 1;
         this.score = 0;
         this.bombCount = 1;
+        this.hintCount = 3;
         this.collector = [];
         this.updateUI();
         this.renderCollector();
@@ -467,17 +469,25 @@ class MahjongGame {
     }
 
     showHint() {
+        if (this.hintCount <= 0) {
+            this.sayMsg("주디", "힌트가 더 이상 없어!");
+            return;
+        }
+
         const selectables = this.tiles.filter(t => !t.removed && !this.isBlocked(t));
         const pairs = {};
         for (let t of selectables) { if (!pairs[t.symbol]) pairs[t.symbol] = []; pairs[t.symbol].push(t); }
         for (let sym in pairs) {
             if (pairs[sym].length >= 2) {
+                this.hintCount--;
+                this.updateUI();
                 const pair = pairs[sym].slice(0, 2);
                 pair.forEach(p => p.element.classList.add('hint'));
                 setTimeout(() => pair.forEach(p => p.element.classList.remove('hint')), 2000);
                 return;
             }
         }
+        this.sayMsg("닉", "아쉽지만 지금은 맞출 수 있는 짝이 없네.");
     }
 
     shuffle(array) {
@@ -491,6 +501,7 @@ class MahjongGame {
         this.stageText.innerText = this.stage;
         this.scoreText.innerText = this.score.toLocaleString();
         document.getElementById('bombCount').innerText = this.bombCount;
+        document.getElementById('hintCount').innerText = this.hintCount;
     }
 
     showFloatingScore(text, x, y) {
