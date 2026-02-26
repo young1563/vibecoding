@@ -11,5 +11,14 @@ const firebaseConfig = {
 };
 
 // Firebase 초기화
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database(); 
+var database;
+if (typeof firebase !== 'undefined') {
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+    } catch (e) {
+        console.error("Firebase initialization failed:", e);
+    }
+} else {
+    console.warn("Firebase SDK not loaded. Rankings will be disabled.");
+}
