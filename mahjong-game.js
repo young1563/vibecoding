@@ -144,22 +144,44 @@ class MahjongGame {
     handleTileClick(tile) {
         if (this.isBlocked(tile) || tile.removed || this.collector.length >= this.collectorSize) return;
 
-        // Move to collector
+        // 1. Identify destination slot in UI
+        const nextSlotIdx = this.collector.length;
+        const slots = this.collectorBar.children;
+        const targetSlot = slots[nextSlotIdx];
+
+        if (!targetSlot) return;
+
+        // 2. Lock tile state
         tile.removed = true;
         tile.element.style.pointerEvents = "none";
-        this.collector.push(tile);
+        tile.element.classList.add('moving');
+        tile.element.style.zIndex = "1000"; // Fly over everything
 
-        // Remove from board visually (or move to collector visual)
-        tile.element.style.transition = "all 0.5s ease";
-        tile.element.style.opacity = "0";
-        tile.element.style.transform = "translateY(-200px) scale(0.5)";
+        // 3. Calculate movement vector using screen coordinates
+        const tileRect = tile.element.getBoundingClientRect();
+        const slotRect = targetSlot.getBoundingClientRect();
 
+        const deltaX = slotRect.left - tileRect.left;
+        const deltaY = slotRect.top - tileRect.top;
+
+        // 4. Apply flying animation
+        // Move to target, scale to fit slot, and rotate slightly for dynamic feel
+        tile.element.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+        tile.element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${slotRect.width / tileRect.width})`;
+
+        // 5. Update data after animation finishes
         setTimeout(() => {
+            this.collector.push(tile);
+            tile.element.style.opacity = "0"; // Hide original
+
             this.renderCollector();
             this.checkMatches();
             this.checkBlockedStatus();
             this.checkClear();
-        }, 500);
+
+            // Clean up original element
+            setTimeout(() => tile.element.remove(), 100);
+        }, 600);
     }
 
     renderCollector() {

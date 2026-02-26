@@ -415,6 +415,11 @@ body {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
+.tile.moving {
+    pointer-events: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
 .tile.selected {
     background-color: var(--secondary-color);
     color: white;
