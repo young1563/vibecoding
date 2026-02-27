@@ -64,19 +64,26 @@ class MahjongGame {
         this.sayMsg("주디", "상단 보관함에 4개가 꽉 차면 안 돼! 신중하게 골라줘.");
     }
 
+    goToLobby() {
+        this.startScreen.classList.remove('hidden');
+        this.gameHeader.classList.add('hidden');
+        this.gameFooter.classList.add('hidden');
+        this.mahjongArea.classList.add('hidden');
+        this.collectorContainer.classList.add('hidden');
+
+        // Reset game state for a clean start next time
+        this.stage = 1;
+        this.score = 0;
+        this.bombCount = 1;
+        this.hintCount = 3;
+        this.collector = [];
+        this.updateUI();
+        this.renderCollector();
+    }
+
     goHome() {
         if (confirm("수사를 중단하고 본부(홈)로 돌아가시겠습니까? 현재 진행 상황은 저장되지 않습니다.")) {
-            this.startScreen.classList.remove('hidden');
-            this.gameHeader.classList.add('hidden');
-            this.gameFooter.classList.add('hidden');
-            this.mahjongArea.classList.add('hidden');
-            this.collectorContainer.classList.add('hidden');
-
-            // Optional: reset game state
-            this.stage = 1;
-            this.score = 0;
-            this.bombCount = 1;
-            this.updateUI();
+            this.goToLobby();
         }
     }
 
@@ -361,12 +368,14 @@ class MahjongGame {
 
     gameOver() {
         this.sayMsg("닉", "보관함이 꽉 찼어. 이번 사건은 여기까지인 것 같네.");
+        this.saveScore();
 
         // Populate and show Modal
         this.finalScoreText.innerText = this.score.toLocaleString();
         this.finalStageText.innerText = this.stage;
         this.gameOverModal.classList.remove('hidden');
     }
+
 
     restartGame() {
         this.gameOverModal.classList.add('hidden');
@@ -463,8 +472,10 @@ class MahjongGame {
         // Modal Buttons
         document.getElementById('restartGameBtn').onclick = () => this.restartGame();
         document.getElementById('modalHomeBtn').onclick = () => {
-            this.gameOverModal.classList.add('hidden');
-            this.goHome();
+            if (confirm("수사를 중단하고 본부(홈)로 돌아가시겠습니까?")) {
+                this.gameOverModal.classList.add('hidden');
+                this.goToLobby();
+            }
         };
     }
 
