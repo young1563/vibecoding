@@ -47,7 +47,8 @@
                     <button class="icon-btn-small" id="showRankingBtn" title="명예 전당"><i
                             class="fas fa-trophy"></i></button>
                     <button class="icon-btn-small" title="수사 도구"><i class="fas fa-cog"></i></button>
-                    <button class="icon-btn-small" title="사건 정보"><i class="fas fa-question"></i></button>
+                    <button class="icon-btn-small" id="showHelpBtn" title="사건 정보"><i
+                            class="fas fa-question"></i></button>
                 </div>
             </div>
 
@@ -97,6 +98,41 @@
             </div>
         </div>
 
+        <!-- Help Modal -->
+        <div id="helpModal" class="screen hidden">
+            <div class="modal-content help-content">
+                <div class="ranking-header">
+                    <h2>🔍 수사 가이드</h2>
+                    <button class="close-btn" id="closeHelpBtn"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="help-scroll-area">
+                    <div class="help-section">
+                        <h3><i class="fas fa-puzzle-piece"></i> 기본 규칙</h3>
+                        <p>동일한 모양의 단서(타일)를 <strong>2개</strong> 선택하면 증거가 확보되어 제거됩니다.</p>
+                        <p>타일은 양옆이 비어있거나 위에 다른 타일이 없을 때만 선택할 수 있습니다.</p>
+                    </div>
+
+                    <div class="help-section">
+                        <h3><i class="fas fa-briefcase"></i> 증거 보관함</h3>
+                        <p>선택한 타일은 상단 보관함으로 이동합니다. 보관함 <strong>4칸</strong>이 꽉 차고 더 이상 맞출 짝이 없으면 수사가 중단(게임오버)됩니다.</p>
+                    </div>
+
+                    <div class="help-section">
+                        <h3><i class="fas fa-magic"></i> 특수 아이템</h3>
+                        <ul class="help-list">
+                            <li><i class="fas fa-random"></i> <strong>셔플:</strong> 모든 타일의 위치를 무작위로 재배치합니다.</li>
+                            <li><i class="fas fa-undo"></i> <strong>되돌리기:</strong> 마지막 행동을 취소합니다.</li>
+                            <li><i class="fas fa-bomb"></i> <strong>폭탄:</strong> 보관함에 있는 모든 타일을 즉시 제거합니다.</li>
+                            <li><i class="fas fa-lightbulb"></i> <strong>힌트:</strong> 맞출 수 있는 짝 하나를 강조 표시합니다.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button class="main-btn" id="helpConfirmBtn">알겠습니다!</button>
+            </div>
+        </div>
+
         <!-- Header -->
         <header class="game-header">
             <div class="stage-info">
@@ -143,15 +179,15 @@
         <!-- Footer: Items & Skills -->
         <footer class="game-footer">
             <div class="item-bar">
-                <button class="skill-btn" id="shuffleBtn">
+                <button class="skill-btn" id="footerShuffleBtn">
                     <div class="icon-circle"><i class="fas fa-random"></i></div>
                     <span>셔플</span>
                 </button>
-                <button class="skill-btn" id="undoBtn">
+                <button class="skill-btn" id="footerUndoBtn">
                     <div class="icon-circle"><i class="fas fa-undo"></i></div>
                     <span>되돌리기</span>
                 </button>
-                <button class="skill-btn" id="bombBtn">
+                <button class="skill-btn" id="footerBombBtn">
                     <div class="icon-circle"><i class="fas fa-bomb"></i></div>
                     <span>폭탄</span>
                 </button>

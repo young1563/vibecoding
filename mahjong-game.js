@@ -19,8 +19,9 @@ class MahjongGame {
         this.collectorContainer = document.getElementById('collectorContainer');
         this.collectorBar = document.getElementById('collectorBar');
 
-        // Game Over Modal Elements
+        // Modal Elements
         this.gameOverModal = document.getElementById('gameOverModal');
+        this.helpModal = document.getElementById('helpModal');
         this.finalScoreText = document.getElementById('finalScore');
         this.finalStageText = document.getElementById('finalStage');
 
@@ -169,7 +170,7 @@ class MahjongGame {
             tile.style.fontSize = `${1.8 * finalScale}rem`;
             tile.style.zIndex = data.z * 10;
 
-            const tileData = { element: tile, symbol: data.symbol, z: data.z, removed: false };
+            const tileData = { element: tile, symbol: data.symbol, x: data.x, y: data.y, z: data.z, removed: false };
             tile.onclick = () => this.handleTileClick(tileData);
             this.boardElement.appendChild(tile);
             this.tiles.push(tileData);
@@ -207,15 +208,14 @@ class MahjongGame {
         // 5. Update data after animation finishes
         setTimeout(() => {
             this.collector.push(tile);
-            tile.element.style.opacity = "0"; // Hide original
+            tile.element.style.display = "none"; // Hide instead of completely removing for undo
+            tile.element.style.opacity = "1";
+            tile.element.style.transform = "none";
 
             this.renderCollector();
             this.checkMatches();
             this.checkBlockedStatus();
             this.checkClear();
-
-            // Clean up original element
-            setTimeout(() => tile.element.remove(), 100);
         }, 600);
     }
 
@@ -384,9 +384,43 @@ class MahjongGame {
         this.bombCount = 1;
         this.hintCount = 3;
         this.collector = [];
+        this.tiles.forEach(t => t.element.remove()); // Clean old elements
         this.updateUI();
         this.renderCollector();
         this.createStage();
+    }
+
+    shuffleTiles() {
+        const remainingTiles = this.tiles.filter(t => !t.removed);
+        if (remainingTiles.length === 0) return;
+
+        const symbols = remainingTiles.map(t => t.symbol);
+        this.shuffle(symbols);
+
+        remainingTiles.forEach((tile, i) => {
+            tile.symbol = symbols[i];
+            tile.element.innerText = symbols[i];
+        });
+
+        this.checkBlockedStatus();
+        this.sayMsg("닉", "타일을 좀 섞어봤어. 이제 짝이 좀 보이나?");
+    }
+
+    undoMove() {
+        if (this.collector.length === 0) {
+            this.sayMsg("주디", "보관함이 비어있어. 되돌릴 행동이 없어!");
+            return;
+        }
+
+        const tile = this.collector.pop();
+        tile.removed = false;
+        tile.element.style.display = "flex";
+        tile.element.style.pointerEvents = "auto";
+        tile.element.classList.remove('moving');
+
+        this.renderCollector();
+        this.checkBlockedStatus();
+        this.sayMsg("주디", "알았어! 마지막 단서를 다시 제자리로 돌려놨어.");
     }
 
     useBomb() {
@@ -464,10 +498,21 @@ class MahjongGame {
         if (startBtn) startBtn.onclick = () => this.startGame();
         document.getElementById('showRankingBtn').onclick = () => { this.rankingScreen.classList.remove('hidden'); this.loadRankings(); };
         document.getElementById('closeRankingBtn').onclick = () => this.rankingScreen.classList.add('hidden');
-        document.getElementById('shuffleBtn').onclick = () => { this.createStage(); this.sayMsg("닉", "재배치 완료! 이제 좀 보이려나?"); };
+
+        // Game Header Controls
         document.getElementById('hintBtn').onclick = () => this.showHint();
         document.getElementById('bombBtn').onclick = () => this.useBomb();
         document.getElementById('homeBtn').onclick = () => this.goHome();
+
+        // Footer Skill Buttons
+        document.getElementById('footerShuffleBtn').onclick = () => this.shuffleTiles();
+        document.getElementById('footerUndoBtn').onclick = () => this.undoMove();
+        document.getElementById('footerBombBtn').onclick = () => this.useBomb();
+
+        // Help Modal Controls
+        document.getElementById('showHelpBtn').onclick = () => this.helpModal.classList.remove('hidden');
+        document.getElementById('closeHelpBtn').onclick = () => this.helpModal.classList.add('hidden');
+        document.getElementById('helpConfirmBtn').onclick = () => this.helpModal.classList.add('hidden');
 
         // Modal Buttons
         document.getElementById('restartGameBtn').onclick = () => this.restartGame();
