@@ -213,6 +213,16 @@ body {
     box-shadow: 0 15px 40px rgba(255, 159, 28, 0.6);
 }
 
+.lab-btn {
+    background: var(--gradient-nature) !important;
+    box-shadow: 0 10px 30px rgba(46, 196, 182, 0.3) !important;
+    margin-top: -0.5rem;
+}
+
+.lab-btn:hover {
+    box-shadow: 0 15px 40px rgba(46, 196, 182, 0.5) !important;
+}
+
 .sub-actions {
     display: flex;
     justify-content: center;
