@@ -22,6 +22,7 @@ class MahjongGame {
         // Modal Elements
         this.gameOverModal = document.getElementById('gameOverModal');
         this.helpModal = document.getElementById('helpModal');
+        this.settingsModal = document.getElementById('settingsModal');
         this.finalScoreText = document.getElementById('finalScore');
         this.finalStageText = document.getElementById('finalStage');
 
@@ -513,6 +514,18 @@ class MahjongGame {
         document.getElementById('showHelpBtn').onclick = () => this.helpModal.classList.remove('hidden');
         document.getElementById('closeHelpBtn').onclick = () => this.helpModal.classList.add('hidden');
         document.getElementById('helpConfirmBtn').onclick = () => this.helpModal.classList.add('hidden');
+
+        // Settings Modal Controls
+        document.getElementById('showSettingsBtn').onclick = () => this.settingsModal.classList.remove('hidden');
+        document.getElementById('closeSettingsBtn').onclick = () => this.settingsModal.classList.add('hidden');
+        document.getElementById('settingsConfirmBtn').onclick = () => this.settingsModal.classList.add('hidden');
+        document.getElementById('resetDataBtn').onclick = () => {
+            if (confirm("모든 수사 기록과 설정이 초기화됩니다. 계속하시겠습니까?")) {
+                localStorage.clear();
+                alert("기록이 초기화되었습니다. 페이지를 새로고침합니다.");
+                location.reload();
+            }
+        };
 
         // Modal Buttons
         document.getElementById('restartGameBtn').onclick = () => this.restartGame();

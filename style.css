@@ -958,6 +958,154 @@ body {
     margin-top: 4px;
 }
 
+/* Settings Modal Specifics */
+.settings-content {
+    max-width: 500px;
+}
+
+.settings-scroll-area {
+    padding: 1rem 0.5rem;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.settings-group {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.settings-group h3 {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #F1F3F5;
+    padding-bottom: 0.5rem;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    font-weight: 600;
+}
+
+/* Toggle Switch Style */
+.switch {
+    position: relative;
+    display: flex;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-color);
+}
+
+input:checked+.slider:before {
+    transform: translateX(24px);
+}
+
+/* Select & Buttons in Settings */
+.setting-select {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-family: inherit;
+    font-weight: 700;
+}
+
+.danger-btn-mini {
+    background: #FFE5E5;
+    color: var(--accent-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.danger-btn-mini:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Partner Selector Cards */
+.partner-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.partner-option {
+    cursor: pointer;
+}
+
+.partner-option input {
+    display: none;
+}
+
+.partner-card {
+    background: #F8F9FA;
+    padding: 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.partner-card .emoji {
+    font-size: 2.5rem;
+}
+
+.partner-card .label {
+    font-weight: 800;
+    color: #666;
+}
+
+.partner-option input:checked+.partner-card {
+    border-color: var(--primary-color);
+    background: #FFF9F0;
+}
+
+.partner-option input:checked+.partner-card .label {
+    color: var(--primary-color);
+}
+
 @media (max-width: 768px) {
     #gameContainer {
         padding: 1.5rem;

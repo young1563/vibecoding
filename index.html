@@ -46,7 +46,8 @@
                 <div class="sub-actions">
                     <button class="icon-btn-small" id="showRankingBtn" title="명예 전당"><i
                             class="fas fa-trophy"></i></button>
-                    <button class="icon-btn-small" title="수사 도구"><i class="fas fa-cog"></i></button>
+                    <button class="icon-btn-small" id="showSettingsBtn" title="수사 도구"><i
+                            class="fas fa-cog"></i></button>
                     <button class="icon-btn-small" id="showHelpBtn" title="사건 정보"><i
                             class="fas fa-question"></i></button>
                 </div>
@@ -130,6 +131,76 @@
                 </div>
 
                 <button class="main-btn" id="helpConfirmBtn">알겠습니다!</button>
+            </div>
+        </div>
+
+        <!-- Settings Modal (수사 도구) -->
+        <div id="settingsModal" class="screen hidden">
+            <div class="modal-content settings-content">
+                <div class="ranking-header">
+                    <h2>⚙️ 수사 도구 설정</h2>
+                    <button class="close-btn" id="closeSettingsBtn"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="settings-scroll-area">
+                    <!-- 1. 오디오 설정 -->
+                    <div class="settings-group">
+                        <h3><i class="fas fa-volume-up"></i> 오디오 피드백</h3>
+                        <div class="setting-item">
+                            <span>배경음악 (BGM)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="bgmToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>효과음 (SFX)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="sfxToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 3. 언어 및 데이터 -->
+                    <div class="settings-group">
+                        <h3><i class="fas fa-language"></i> 시스템 구성</h3>
+                        <div class="setting-item">
+                            <span>수사 언어 (Language)</span>
+                            <select id="languageSelect" class="setting-select">
+                                <option value="ko">한국어 (KO)</option>
+                                <option value="en">English (EN)</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <span>수사 기록 초기화</span>
+                            <button class="danger-btn-mini" id="resetDataBtn">기록 삭제</button>
+                        </div>
+                    </div>
+
+                    <!-- 4. 파트너 테마 -->
+                    <div class="settings-group">
+                        <h3><i class="fas fa-user-friends"></i> 수사 파트너 설정</h3>
+                        <div class="partner-selector">
+                            <label class="partner-option">
+                                <input type="radio" name="partner" value="judy" checked>
+                                <div class="partner-card">
+                                    <span class="emoji">🐰</span>
+                                    <span class="label">주디</span>
+                                </div>
+                            </label>
+                            <label class="partner-option">
+                                <input type="radio" name="partner" value="nick">
+                                <div class="partner-card">
+                                    <span class="emoji">🦊</span>
+                                    <span class="label">닉</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="main-btn" id="settingsConfirmBtn">설정 저장</button>
             </div>
         </div>
 
