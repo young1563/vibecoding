@@ -310,7 +310,7 @@ class NonogramGame {
     checkHints() {
         const binaryGrid = this.grid.map(row => row.map(v => v !== 0 ? 1 : 0));
         const currentRows = this.calcHints(binaryGrid);
-        const currentColu = this.calcHints(this.transpose(binaryGrid));
+        const currentCol = this.calcHints(this.transpose(binaryGrid));
 
         currentRows.forEach((h, i) => {
             const el = document.getElementById(`row-h-${i}`);
@@ -318,7 +318,7 @@ class NonogramGame {
             else el.classList.remove('complete');
         });
 
-        currentColu.forEach((h, i) => {
+        currentCol.forEach((h, i) => {
             const el = document.getElementById(`col-h-${i}`);
             if (JSON.stringify(h) === JSON.stringify(this.colHints[i])) el.classList.add('complete');
             else el.classList.remove('complete');
