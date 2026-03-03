@@ -33,6 +33,8 @@ class MahjongGame {
         this.collectorSize = 4;
         this.bombCount = 1; // New: Initialize bomb count
         this.hintCount = 3; // New: Initialize hint count
+        this.shuffleCount = 2; // New: Initialize shuffle count
+        this.undoCount = 3;    // New: Initialize undo count
 
         this.tileSymbols = [
             '🐰', '🦊', '👮', '🥕', '🍩', '🚔', '🦥', '🦁',
@@ -78,6 +80,8 @@ class MahjongGame {
         this.score = 0;
         this.bombCount = 1;
         this.hintCount = 3;
+        this.shuffleCount = 2;
+        this.undoCount = 3;
         this.collector = [];
         this.updateUI();
         this.renderCollector();
@@ -384,6 +388,8 @@ class MahjongGame {
         this.score = 0;
         this.bombCount = 1;
         this.hintCount = 3;
+        this.shuffleCount = 2;
+        this.undoCount = 3;
         this.collector = [];
         this.tiles.forEach(t => t.element.remove()); // Clean old elements
         this.updateUI();
@@ -392,8 +398,16 @@ class MahjongGame {
     }
 
     shuffleTiles() {
+        if (this.shuffleCount <= 0) {
+            this.sayMsg("주디", "더 이상 섞을 수 없어!");
+            return;
+        }
+
         const remainingTiles = this.tiles.filter(t => !t.removed);
         if (remainingTiles.length === 0) return;
+
+        this.shuffleCount--;
+        this.updateUI();
 
         const symbols = remainingTiles.map(t => t.symbol);
         this.shuffle(symbols);
@@ -408,10 +422,17 @@ class MahjongGame {
     }
 
     undoMove() {
+        if (this.undoCount <= 0) {
+            this.sayMsg("주디", "더 이상 되돌릴 수 없어!");
+            return;
+        }
         if (this.collector.length === 0) {
             this.sayMsg("주디", "보관함이 비어있어. 되돌릴 행동이 없어!");
             return;
         }
+
+        this.undoCount--;
+        this.updateUI();
 
         const tile = this.collector.pop();
         tile.removed = false;
@@ -515,7 +536,6 @@ class MahjongGame {
 
         // Game Header Controls
         document.getElementById('hintBtn').onclick = () => this.showHint();
-        document.getElementById('bombBtn').onclick = () => this.useBomb();
         document.getElementById('homeBtn').onclick = () => this.goHome();
 
         // Footer Skill Buttons
@@ -584,6 +604,8 @@ class MahjongGame {
         this.scoreText.innerText = this.score.toLocaleString();
         document.getElementById('bombCount').innerText = this.bombCount;
         document.getElementById('hintCount').innerText = this.hintCount;
+        document.getElementById('shuffleCount').innerText = this.shuffleCount;
+        document.getElementById('undoCount').innerText = this.undoCount;
     }
 
     showFloatingScore(text, x, y) {

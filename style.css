@@ -737,6 +737,20 @@ body {
     color: var(--text-dark);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     transition: all 0.2s;
+    position: relative;
+}
+
+.icon-circle .count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent-color);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 800;
+    border: 2px solid white;
 }
 
 .skill-btn span {
