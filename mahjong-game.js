@@ -435,10 +435,23 @@ class MahjongGame {
         }
 
         this.bombCount--;
+
+        // Clear matching partners from board to prevent orphans
+        this.collector.forEach(collectorTile => {
+            const partner = this.tiles.find(t => !t.removed && t.symbol === collectorTile.symbol);
+            if (partner) {
+                partner.removed = true;
+                partner.element.style.display = "none";
+                this.score += 100 * this.stage;
+            }
+        });
+
         this.collector = [];
         this.renderCollector();
         this.updateUI();
-        this.sayMsg("주디", "펑! 보관함을 깨끗하게 비웠어. 다시 시작해봐!");
+        this.checkBlockedStatus();
+        this.checkClear();
+        this.sayMsg("주디", "펑! 보관함과 관련된 증거들을 모두 정리했어. 다시 수사해보자!");
     }
 
     saveScore() {
