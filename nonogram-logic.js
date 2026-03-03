@@ -16,6 +16,8 @@ class NonogramGame {
         this.rotation = 0; // 0, 90, 180, 270
         this.currentHoverCell = null;
         this.lastHoveredCellEl = null;
+        this.mousePos = { x: 0, y: 0 };
+        this.isDragging = false;
 
         this.init();
     }
@@ -101,6 +103,10 @@ class NonogramGame {
     renderGrid() {
         const container = document.getElementById('mainGrid');
         container.innerHTML = '';
+
+        // Dynamically set grid columns
+        container.style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+
         for (let r = 0; r < this.size; r++) {
             for (let c = 0; c < this.size; c++) {
                 const cell = document.createElement('div');
@@ -168,7 +174,15 @@ class NonogramGame {
             slot.appendChild(container);
 
             if (!block.used) {
-                slot.onclick = () => this.selectBlock(i);
+                slot.onmousedown = (e) => {
+                    // Update mousePos immediately on click/drag start
+                    this.mousePos.x = e.clientX;
+                    this.mousePos.y = e.clientY;
+
+                    this.selectBlock(i);
+                    this.isDragging = true;
+                    this.updateGhost();
+                };
             }
             list.appendChild(slot);
         });
@@ -202,32 +216,44 @@ class NonogramGame {
 
     updateGhost() {
         const ghost = document.getElementById('ghostBlock');
-        if (this.selectedIdx === -1 || !this.lastHoveredCellEl) {
+        if (this.selectedIdx === -1) {
             ghost.style.display = 'none';
             return;
         }
 
         ghost.style.display = 'block';
-
-        // Snap to cellular position
-        const rect = this.lastHoveredCellEl.getBoundingClientRect();
-        ghost.style.left = `${rect.left}px`;
-        ghost.style.top = `${rect.top}px`;
-
         ghost.innerHTML = '';
 
         const block = this.blocks[this.selectedIdx];
         const shape = this.getRotatedShape(block.shape, this.rotation);
+
+        // Measure actual cell size from the DOM
+        const sampleCell = document.querySelector('.cell');
+        const cellW = sampleCell ? sampleCell.offsetWidth : 70;
+        const cellH = sampleCell ? sampleCell.offsetHeight : 70;
+
+        if (this.lastHoveredCellEl) {
+            // Snap to grid with scroll compensation
+            const rect = this.lastHoveredCellEl.getBoundingClientRect();
+            ghost.style.left = `${rect.left + window.scrollX}px`;
+            ghost.style.top = `${rect.top + window.scrollY}px`;
+        } else {
+            // Follow mouse with scroll compensation
+            ghost.style.left = `${this.mousePos.x + window.scrollX - cellW / 2}px`;
+            ghost.style.top = `${this.mousePos.y + window.scrollY - cellH / 2}px`;
+        }
 
         shape.forEach((row, r) => {
             row.forEach((v, c) => {
                 if (v) {
                     const gc = document.createElement('div');
                     gc.className = 'ghost-cell';
-                    gc.style.left = `${c * 70}px`;
-                    gc.style.top = `${r * 70}px`;
+                    gc.style.width = `${cellW}px`;
+                    gc.style.height = `${cellH}px`;
+                    gc.style.left = `${c * cellW}px`;
+                    gc.style.top = `${r * cellH}px`;
 
-                    // Check if placement is valid
+                    // Check if placement is valid (only if hovering over grid)
                     if (this.currentHoverCell) {
                         const targetR = this.currentHoverCell.r + r;
                         const targetC = this.currentHoverCell.c + c;
@@ -353,7 +379,23 @@ class NonogramGame {
     }
 
     setupEvents() {
-        // Ghost movement is now handled by mouseenter in renderGrid
+        window.addEventListener('mousemove', (e) => {
+            this.mousePos.x = e.clientX;
+            this.mousePos.y = e.clientY;
+            if (this.selectedIdx !== -1) {
+                this.updateGhost();
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (this.isDragging) {
+                if (this.currentHoverCell) {
+                    this.handleGridClick(this.currentHoverCell.r, this.currentHoverCell.c);
+                }
+                this.isDragging = false;
+                this.updateGhost();
+            }
+        });
 
         window.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'r') this.rotate();
