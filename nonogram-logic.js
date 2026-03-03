@@ -368,12 +368,18 @@ class NonogramGame {
                 winTitle.innerText = "REPAIRED";
                 winMsg.innerText = "회로가 성공적으로 복구되었습니다. 다음 레벨로 이동하시겠습니까?";
                 nextBtn.innerText = "다음 사건 수사하기";
-                nextBtn.onclick = () => this.setupLevel(this.currentLevelIdx + 1);
+                nextBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.setupLevel(this.currentLevelIdx + 1);
+                };
             } else {
                 winTitle.innerText = "MISSION COMPLETE";
                 winMsg.innerText = "모든 특별 사건을 해결했습니다! 본부의 주디와 닉에게 보고하세요.";
                 nextBtn.innerText = "본부 복귀";
-                nextBtn.onclick = () => location.href = 'index.html';
+                nextBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    location.href = 'index.html';
+                };
             }
         }
     }
