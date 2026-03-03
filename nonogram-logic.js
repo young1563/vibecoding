@@ -6,41 +6,79 @@
 class NonogramGame {
     constructor() {
         this.size = 5;
-        this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0)); // 0: empty, 1+: blockID
-
-        // Target pattern for hints (A balanced 5x5 pattern)
-        this.answer = [
-            [1, 1, 0, 0, 0],
-            [1, 1, 0, 0, 0],
-            [1, 1, 1, 1, 0],
-            [0, 0, 1, 1, 0],
-            [0, 0, 1, 1, 0]
-        ];
-
-        // Polyomino blocks needed to fill the answer
-        // Total fill count should match the answer's 1s (12 cells here)
-        this.blocks = [
-            { id: 1, name: "ALPHA-2", shape: [[1, 1], [1, 1]], used: false }, // 4 cells
-            { id: 2, name: "BETA-4", shape: [[1, 1, 1, 1]], used: false },      // 4 cells
-            { id: 3, name: "GAMMA-2", shape: [[1, 1], [1, 1]], used: false }  // 4 cells
-        ];
+        this.grid = [];
+        this.answer = [];
+        this.blocks = [];
+        this.levels = [];
+        this.currentLevelIdx = 0;
 
         this.selectedIdx = -1;
         this.rotation = 0; // 0, 90, 180, 270
-        this.mousePos = { x: 0, y: 0 };
         this.currentHoverCell = null;
+        this.lastHoveredCellEl = null;
 
         this.init();
     }
 
-    init() {
+    async init() {
+        await this.loadLevels();
+        this.setupLevel(0);
+        this.setupEvents();
+    }
+
+    async loadLevels() {
+        try {
+            const response = await fetch('./data/nonogram-levels.json');
+            const data = await response.json();
+            this.levels = data.levels;
+        } catch (error) {
+            console.error('Failed to load levels:', error);
+            // Fallback to minimal level if fetch fails
+            this.levels = [{
+                id: 1,
+                title: "Error Recovery",
+                description: "Failed to load levels. Please check your data folder.",
+                size: 5,
+                answer: [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
+                blocks: [{ id: 99, name: "ALPHA-X", shape: [[1, 1], [1, 1]] }]
+            }];
+        }
+    }
+
+    setupLevel(idx) {
+        if (idx < 0 || idx >= this.levels.length) return;
+
+        this.currentLevelIdx = idx;
+        const levelData = this.levels[idx];
+
+        this.size = levelData.size;
+        this.answer = levelData.answer;
+        // Map blocks but ensure 'used' property is added
+        this.blocks = levelData.blocks.map(b => ({ ...b, used: false }));
+
+        this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
+
+        // Update UI Text
+        document.querySelector('h1').innerText = levelData.title;
+        document.querySelector('.info-panel p').innerText = levelData.description;
+        document.querySelector('.badge-mini').innerText = `LEVEL: ${levelData.id}`;
+
+        // Reset game state
+        this.selectedIdx = -1;
+        this.rotation = 0;
+        this.currentHoverCell = null;
+        this.lastHoveredCellEl = null;
+
+        // Re-render
+        this.renderGrid();
         this.rowHints = this.calcHints(this.answer);
         this.colHints = this.calcHints(this.transpose(this.answer));
-
-        this.renderGrid();
         this.renderHints();
         this.renderInventory();
-        this.setupEvents();
+        this.updateBoard();
+
+        // Hide win overlay if visible
+        document.getElementById('winOverlay').style.display = 'none';
     }
 
     calcHints(matrix) {
@@ -70,8 +108,14 @@ class NonogramGame {
                 cell.dataset.r = r;
                 cell.dataset.c = c;
 
-                cell.onmouseenter = () => {
+                cell.onmouseenter = (e) => {
                     this.currentHoverCell = { r, c };
+                    this.lastHoveredCellEl = e.target;
+                    this.updateGhost();
+                };
+                cell.onmouseleave = () => {
+                    this.currentHoverCell = null;
+                    this.lastHoveredCellEl = null;
                     this.updateGhost();
                 };
                 cell.onclick = () => this.handleGridClick(r, c);
@@ -158,12 +202,18 @@ class NonogramGame {
 
     updateGhost() {
         const ghost = document.getElementById('ghostBlock');
-        if (this.selectedIdx === -1) {
+        if (this.selectedIdx === -1 || !this.lastHoveredCellEl) {
             ghost.style.display = 'none';
             return;
         }
 
         ghost.style.display = 'block';
+
+        // Snap to cellular position
+        const rect = this.lastHoveredCellEl.getBoundingClientRect();
+        ghost.style.left = `${rect.left}px`;
+        ghost.style.top = `${rect.top}px`;
+
         ghost.innerHTML = '';
 
         const block = this.blocks[this.selectedIdx];
@@ -242,6 +292,7 @@ class NonogramGame {
 
         this.renderInventory();
         this.updateBoard();
+        this.checkWin();
     }
 
     updateBoard() {
@@ -278,23 +329,37 @@ class NonogramGame {
         const binaryGrid = this.grid.map(row => row.map(v => v !== 0 ? 1 : 0));
         const win = JSON.stringify(binaryGrid) === JSON.stringify(this.answer);
 
-        if (win) {
-            document.getElementById('winOverlay').style.display = 'flex';
+        const overlay = document.getElementById('winOverlay');
+        if (overlay && win) {
+            overlay.style.display = 'flex';
+
+            // Handle Next Level Button
+            const nextBtn = document.getElementById('nextLevelBtn');
+            const winTitle = overlay.querySelector('h1');
+            const winMsg = overlay.querySelector('p');
+
+            if (this.currentLevelIdx < this.levels.length - 1) {
+                winTitle.innerText = "REPAIRED";
+                winMsg.innerText = "회로가 성공적으로 복구되었습니다. 다음 레벨로 이동하시겠습니까?";
+                nextBtn.innerText = "다음 사건 수사하기";
+                nextBtn.onclick = () => this.setupLevel(this.currentLevelIdx + 1);
+            } else {
+                winTitle.innerText = "MISSION COMPLETE";
+                winMsg.innerText = "모든 특별 사건을 해결했습니다! 본부의 주디와 닉에게 보고하세요.";
+                nextBtn.innerText = "본부 복귀";
+                nextBtn.onclick = () => location.href = 'index.html';
+            }
         }
     }
 
     setupEvents() {
-        window.addEventListener('mousemove', (e) => {
-            const ghost = document.getElementById('ghostBlock');
-            ghost.style.left = `${e.clientX + 5}px`;
-            ghost.style.top = `${e.clientY + 5}px`;
-        });
+        // Ghost movement is now handled by mouseenter in renderGrid
 
         window.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'r') this.rotate();
         });
 
-        document.getElementById('resetBtn').onclick = () => location.reload();
+        document.getElementById('resetBtn').onclick = () => this.setupLevel(this.currentLevelIdx);
     }
 }
 
