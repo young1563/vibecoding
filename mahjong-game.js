@@ -10,7 +10,7 @@ class MahjongGame {
         this.dialogueText = document.getElementById('dialogueText');
         this.avatarText = document.getElementById('activeChar');
 
-        this.landingHome = document.getElementById('platformLanding') || document.getElementById('platformHome');
+        this.landingHome = document.getElementById('platformHome');
         this.startScreen = document.getElementById('startScreen');
         this.rankingScreen = document.getElementById('rankingScreen');
         this.rankingList = document.getElementById('rankingList');
@@ -128,6 +128,8 @@ class MahjongGame {
     }
 
     startGame() {
+        this.landingHome.classList.add('hidden');
+        this.startScreen.classList.add('hidden');
         this.mahjongGameScreen.classList.remove('hidden');
 
         this.collector = [];
@@ -570,20 +572,42 @@ class MahjongGame {
     }
 
     saveScore() {
-        if (typeof database !== 'undefined') {
-            const userName = localStorage.getItem('zootopia_user_name') || "무명 수사관";
-            database.ref('rankings/' + userName).set({
-                score: this.score,
-                stage: this.stage,
-                lastUpdated: Date.now()
-            });
+        const userName = localStorage.getItem('zootopia_user_name') || "무명 수사관";
+        const scoreData = {
+            score: this.score,
+            stage: this.stage,
+            lastUpdated: Date.now()
+        };
+
+        // 1. Always attempt Firebase save if valid
+        const isFirebaseValid = typeof database !== 'undefined' &&
+            database.app.options.databaseURL &&
+            database.app.options.databaseURL !== "YOUR_DATABASE_URL";
+
+        if (isFirebaseValid) {
+            database.ref('rankings/' + userName).set(scoreData);
         }
+
+        // 2. Always maintain local rankings for fallback/offline
+        let localRankings = JSON.parse(localStorage.getItem('zib_local_rankings')) || [];
+        // Check if user already exists in local rankings
+        const existingIdx = localRankings.findIndex(r => r.name === userName);
+        if (existingIdx > -1) {
+            if (localRankings[existingIdx].score < this.score) {
+                localRankings[existingIdx] = { name: userName, ...scoreData };
+            }
+        } else {
+            localRankings.push({ name: userName, ...scoreData });
+        }
+
+        // Sort and keep top 20
+        localRankings.sort((a, b) => b.score - a.score);
+        localStorage.setItem('zib_local_rankings', JSON.stringify(localRankings.slice(0, 20)));
     }
 
     loadRankings() {
         this.rankingList.innerHTML = '<div class="loading">수사 기록을 불러오는 중...</div>';
 
-        // Check if database is initialized and has a valid URL
         const isFirebaseValid = typeof database !== 'undefined' &&
             database.app.options.databaseURL &&
             database.app.options.databaseURL !== "YOUR_DATABASE_URL";
@@ -591,35 +615,57 @@ class MahjongGame {
         if (isFirebaseValid) {
             database.ref('rankings').orderByChild('score').limitToLast(10).once('value')
                 .then((snapshot) => {
-                    this.rankingList.innerHTML = '';
-                    const data = [];
-                    snapshot.forEach(child => { data.push({ name: child.key, ...child.val() }); });
-
-                    if (data.length === 0) {
-                        this.rankingList.innerHTML = '<div class="empty">아직 등록된 수사 기록이 없습니다.</div>';
-                        return;
-                    }
-
-                    data.reverse().forEach((item, index) => {
-                        const entry = document.createElement('div');
-                        entry.className = 'ranking-entry';
-                        entry.innerHTML = `<span class="rank">#${index + 1}</span><span class="name">${item.name}</span><span class="score">${item.score.toLocaleString()}</span><span class="stage">ST.${item.stage}</span>`;
-                        this.rankingList.appendChild(entry);
-                    });
+                    this.renderRankings(snapshot);
                 })
                 .catch((err) => {
                     console.error("Firebase load error:", err);
-                    this.rankingList.innerHTML = '<div class="error">데이터를 불러오는 데 실패했습니다.</div>';
+                    this.loadLocalRankings();
                 });
         } else {
-            // Fallback for local testing if Firebase is not set up
-            this.rankingList.innerHTML = `
-                <div class="error">
-                    <p style="margin-bottom: 0.5rem">Firebase 설정이 필요합니다.</p>
-                    <small style="color: #666">firebase-config.js 파일에 실제 API 정보를 입력해주세요.</small>
-                </div>`;
-            console.warn("Firebase not configured properly. Check firebase-config.js");
+            this.loadLocalRankings();
         }
+    }
+
+    renderRankings(snapshot) {
+        this.rankingList.innerHTML = '';
+        const data = [];
+        snapshot.forEach(child => { data.push({ name: child.key, ...child.val() }); });
+
+        if (data.length === 0) {
+            this.rankingList.innerHTML = '<div class="empty">아직 등록된 실시간 수사 기록이 없습니다.</div>';
+            return;
+        }
+
+        this.displayRankingEntries(data.reverse());
+    }
+
+    loadLocalRankings() {
+        const localData = JSON.parse(localStorage.getItem('zib_local_rankings')) || [];
+        this.rankingList.innerHTML = '<div class="local-badge" style="text-align:center; font-size:0.7rem; color:#A0AEC0; margin-bottom:1rem;">⚠️ 오프라인 보관함 로드됨</div>';
+
+        if (localData.length === 0) {
+            this.rankingList.innerHTML += '<div class="empty">저장된 로컬 수사 기록이 없습니다.</div>';
+            return;
+        }
+
+        this.displayRankingEntries(localData.slice(0, 10));
+    }
+
+    displayRankingEntries(data) {
+        data.forEach((item, index) => {
+            const entry = document.createElement('div');
+            entry.className = 'rank-item'; // Match the style in style.css
+            entry.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span class="rank" style="font-weight:900; color:var(--primary-color); width:25px;">#${index + 1}</span>
+                    <span class="rank-name">${item.name}</span>
+                </div>
+                <div style="text-align:right">
+                    <div class="rank-score">${item.score.toLocaleString()} PTS</div>
+                    <small style="font-size:0.7rem; color:#A0AEC0">STAGE ${item.stage}</small>
+                </div>`;
+            this.rankingList.appendChild(entry);
+        });
     }
 
     setupControls() {
