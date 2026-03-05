@@ -200,349 +200,350 @@
                         </nav>
                     </div>
                 </div>
+            </div> <!-- End platformHome -->
 
-                <!-- Shop Modal -->
-                <div id="shopModal" class="screen hidden">
-                    <div class="modal-content help-content">
-                        <div class="ranking-header">
-                            <h2>🛒 ZIB 보급 창고</h2>
-                            <button class="close-btn" id="closeShopBtn"><i class="fas fa-times"></i></button>
-                        </div>
-                        <div class="shop-grid">
-                            <div class="shop-item" data-item="hint" data-price="300">
-                                <div class="item-icon">💡</div>
-                                <span class="item-name">수사 힌트 (x3)</span>
-                                <div class="item-price"><i class="fas fa-star"></i> 300</div>
-                                <button class="main-btn-small buy-btn">구매</button>
-                            </div>
-                            <div class="shop-item" data-item="bomb" data-price="500">
-                                <div class="item-icon">💣</div>
-                                <span class="item-name">증거 폭발물 (x1)</span>
-                                <div class="item-price"><i class="fas fa-star"></i> 500</div>
-                                <button class="main-btn-small buy-btn">구매</button>
-                            </div>
-                            <div class="shop-item" data-item="shuffle" data-price="200">
-                                <div class="item-icon">🔄</div>
-                                <span class="item-name">현장 재구성 (x2)</span>
-                                <div class="item-price"><i class="fas fa-star"></i> 200</div>
-                                <button class="main-btn-small buy-btn">구매</button>
-                            </div>
-                            <div class="shop-item" data-item="undo" data-price="150">
-                                <div class="item-icon">↩️</div>
-                                <span class="item-name">수사 되돌리기 (x3)</span>
-                                <div class="item-price"><i class="fas fa-star"></i> 150</div>
-                                <button class="main-btn-small buy-btn">구매</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nonogram (Circuit Repair) Screen -->
-                <div id="nonogramGameScreen" class="screen hidden">
-                    <div class="lab-layout">
-                        <!-- Left Info Panel -->
-                        <div class="info-panel">
-                            <div class="badge-mini">LOG: V-40053</div>
-                            <h1>회로 복구 모듈</h1>
-                            <p>회로 기판의 에너지 흐름(숫자 힌트)이 정상화되도록 전력 모듈을 배치하여 수리하십시오.</p>
-
-                            <div class="controls-hint">
-                                <p><i class="fas fa-mouse-pointer"></i> <b>클릭:</b> 부품 선택 / 배치</p>
-                                <p><i class="fas fa-redo"></i> <b>R 키:</b> 부품 회전</p>
-                                <p><i class="fas fa-times"></i> <b>우클릭:</b> 배치 취소</p>
-                            </div>
-
-                            <button class="sub-btn back-btn" id="nonogramBackBtn"><i class="fas fa-arrow-left"></i> 본부
-                                복귀</button>
-                        </div>
-
-                        <!-- Central Grid -->
-                        <div class="puzzle-core">
-                            <div class="grid-wrapper">
-                                <div id="colHints" class="hint-col"></div>
-                                <div id="rowHints" class="hint-row"></div>
-                                <div id="mainGrid" class="grid-container"></div>
-                            </div>
-                        </div>
-
-                        <!-- Right Inventory -->
-                        <div class="inventory-panel">
-                            <h3>확보된 수사 증거</h3>
-                            <div id="blockList" class="block-list"></div>
-                            <button class="btn-action" id="resetBtn"><i class="fas fa-sync"></i> 회로 초기화</button>
-                        </div>
-                    </div>
-
-                    <!-- Win Screen (Integrated) -->
-                    <div id="winOverlay">
-                        <div class="win-content">
-                            <h1>REPAIRED</h1>
-                            <p>회로가 성공적으로 복구되었습니다.</p>
-                            <button class="main-btn" id="nextLevelBtn">다음 사건 수사하기</button>
-                        </div>
-                    </div>
-                    <!-- Ghost Preview -->
-                    <div id="ghostBlock"></div>
-                </div>
-
-                <!-- Start Screen (Lobby) - Now treated as Mahjong Specific Lobby -->
-                <div id="startScreen" class="screen hidden">
-                    <!-- (Existing Mahjong Lobby Content) -->
-                    <div class="logo-area">
-                        <div class="badge-mini">경찰 기록 제2026호</div>
-                        <h1>마작 <span class="highlight">마스터</span></h1>
-                        <p class="subtitle">도시 추격전 • 수사 모듈 01</p>
-                    </div>
-
-                    <div class="hero-presentation">
-                        <div class="hero-unit judy">
-                            <div class="hero-avatar">🐰</div>
-                            <div class="hero-info">
-                                <span class="tag">수사관</span>
-                                <span class="name">주디 홉스</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="menu-actions">
-                        <button id="startGameBtn" class="main-btn">
-                            <i class="fas fa-play"></i> 수사 개시 (Stage 1)
-                        </button>
-                        <button class="sub-btn" id="backToPlatformBtn">
-                            <i class="fas fa-arrow-left"></i> 본부로 돌아가기
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Ranking Screen -->
-                <div id="rankingScreen" class="screen hidden">
+            <!-- Shop Modal -->
+            <div id="shopModal" class="screen hidden">
+                <div class="modal-content help-content">
                     <div class="ranking-header">
-                        <h2>🏆 주토피아 명예 전당</h2>
-                        <button class="close-btn" id="closeRankingBtn"><i class="fas fa-times"></i></button>
+                        <h2>🛒 ZIB 보급 창고</h2>
+                        <button class="close-btn" id="closeShopBtn"><i class="fas fa-times"></i></button>
                     </div>
-                    <div class="ranking-list" id="rankingList">
-                        <!-- Rankings will be loaded here -->
-                        <div class="loading">수사 기록을 불러오는 중...</div>
-                    </div>
-                </div>
-
-                <!-- Game Over Modal -->
-                <div id="gameOverModal" class="screen hidden">
-                    <div class="modal-content">
-                        <div class="modal-icon">🚨</div>
-                        <h2>수사 중단!</h2>
-                        <p class="modal-msg">보관함이 꽉 차서 더 이상 단서를 찾을 수 없습니다.</p>
-
-                        <div class="final-stats">
-                            <div class="stat-box">
-                                <span class="label">최종 점수</span>
-                                <span class="value" id="finalScore">0</span>
-                            </div>
-                            <div class="stat-box">
-                                <span class="label">도달 스테이지</span>
-                                <span class="value" id="finalStage">1</span>
-                            </div>
+                    <div class="shop-grid">
+                        <div class="shop-item" data-item="hint" data-price="300">
+                            <div class="item-icon">💡</div>
+                            <span class="item-name">수사 힌트 (x3)</span>
+                            <div class="item-price"><i class="fas fa-star"></i> 300</div>
+                            <button class="main-btn-small buy-btn">구매</button>
                         </div>
-
-                        <div class="modal-actions">
-                            <button class="main-btn restart-btn" id="restartGameBtn">
-                                <i class="fas fa-redo"></i> 다시 도전하기
-                            </button>
-                            <button class="sub-btn home-btn" id="modalHomeBtn">
-                                <i class="fas fa-home"></i> 홈 화면으로
-                            </button>
+                        <div class="shop-item" data-item="bomb" data-price="500">
+                            <div class="item-icon">💣</div>
+                            <span class="item-name">증거 폭발물 (x1)</span>
+                            <div class="item-price"><i class="fas fa-star"></i> 500</div>
+                            <button class="main-btn-small buy-btn">구매</button>
+                        </div>
+                        <div class="shop-item" data-item="shuffle" data-price="200">
+                            <div class="item-icon">🔄</div>
+                            <span class="item-name">현장 재구성 (x2)</span>
+                            <div class="item-price"><i class="fas fa-star"></i> 200</div>
+                            <button class="main-btn-small buy-btn">구매</button>
+                        </div>
+                        <div class="shop-item" data-item="undo" data-price="150">
+                            <div class="item-icon">↩️</div>
+                            <span class="item-name">수사 되돌리기 (x3)</span>
+                            <div class="item-price"><i class="fas fa-star"></i> 150</div>
+                            <button class="main-btn-small buy-btn">구매</button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Help Modal -->
-                <div id="helpModal" class="screen hidden">
-                    <div class="modal-content help-content">
-                        <div class="ranking-header">
-                            <h2>🔍 수사 가이드</h2>
-                            <button class="close-btn" id="closeHelpBtn"><i class="fas fa-times"></i></button>
-                        </div>
-
-                        <div class="help-scroll-area">
-                            <div class="help-section">
-                                <h3><i class="fas fa-puzzle-piece"></i> 기본 규칙</h3>
-                                <p>동일한 모양의 단서(타일)를 <strong>2개</strong> 선택하면 증거가 확보되어 제거됩니다.</p>
-                                <p>타일은 양옆이 비어있거나 위에 다른 타일이 없을 때만 선택할 수 있습니다.</p>
-                            </div>
-
-                            <div class="help-section">
-                                <h3><i class="fas fa-briefcase"></i> 증거 보관함</h3>
-                                <p>선택한 타일은 상단 보관함으로 이동합니다. 보관함 <strong>4칸</strong>이 꽉 차고 더 이상 맞출 짝이 없으면 수사가 중단(게임오버)됩니다.
-                                </p>
-                            </div>
-
-                            <div class="help-section">
-                                <h3><i class="fas fa-magic"></i> 특수 아이템</h3>
-                                <ul class="help-list">
-                                    <li><i class="fas fa-random"></i> <strong>셔플:</strong> 모든 타일의 위치를 무작위로 재배치합니다.</li>
-                                    <li><i class="fas fa-undo"></i> <strong>되돌리기:</strong> 마지막 행동을 취소합니다.</li>
-                                    <li><i class="fas fa-bomb"></i> <strong>폭탄:</strong> 보관함에 있는 모든 타일을 즉시 제거합니다.</li>
-                                    <li><i class="fas fa-lightbulb"></i> <strong>힌트:</strong> 맞출 수 있는 짝 하나를 강조 표시합니다.
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <button class="main-btn" id="helpConfirmBtn">알겠습니다!</button>
-                    </div>
-                </div>
-
-                <!-- Settings Modal (수사 도구) -->
-                <div id="settingsModal" class="screen hidden">
-                    <div class="modal-content settings-content">
-                        <div class="ranking-header">
-                            <h2>⚙️ 수사 도구 설정</h2>
-                            <button class="close-btn" id="closeSettingsBtn"><i class="fas fa-times"></i></button>
-                        </div>
-
-                        <div class="settings-scroll-area">
-                            <!-- 1. 오디오 설정 -->
-                            <div class="settings-group">
-                                <h3><i class="fas fa-volume-up"></i> 오디오 피드백</h3>
-                                <div class="setting-item">
-                                    <span>배경음악 (BGM)</span>
-                                    <label class="switch">
-                                        <input type="checkbox" id="bgmToggle" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-item">
-                                    <span>효과음 (SFX)</span>
-                                    <label class="switch">
-                                        <input type="checkbox" id="sfxToggle" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- 3. 언어 및 데이터 -->
-                            <div class="settings-group">
-                                <h3><i class="fas fa-language"></i> 시스템 구성</h3>
-                                <div class="setting-item">
-                                    <span>수사 언어 (Language)</span>
-                                    <select id="languageSelect" class="setting-select">
-                                        <option value="ko">한국어 (KO)</option>
-                                        <option value="en">English (EN)</option>
-                                    </select>
-                                </div>
-                                <div class="setting-item">
-                                    <span>수사 기록 초기화</span>
-                                    <button class="danger-btn-mini" id="resetDataBtn">기록 삭제</button>
-                                </div>
-                            </div>
-
-                            <!-- 4. 파트너 테마 -->
-                            <div class="settings-group">
-                                <h3><i class="fas fa-user-friends"></i> 수사 파트너 설정</h3>
-                                <div class="partner-selector">
-                                    <label class="partner-option">
-                                        <input type="radio" name="partner" value="judy" checked>
-                                        <div class="partner-card">
-                                            <span class="emoji">🐰</span>
-                                            <span class="label">주디</span>
-                                        </div>
-                                    </label>
-                                    <label class="partner-option">
-                                        <input type="radio" name="partner" value="nick">
-                                        <div class="partner-card">
-                                            <span class="emoji">🦊</span>
-                                            <span class="label">닉</span>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="main-btn" id="settingsConfirmBtn">설정 저장</button>
-                    </div>
-                </div>
-
-                <!-- 6. Mahjong Game Screen (The actual gameplay) -->
-                <div id="mahjongGameScreen" class="screen hidden">
-                    <!-- Header -->
-                    <header class="game-header">
-                        <div class="stage-info">
-                            <button class="icon-btn-small" id="homeBtn" title="홈으로"><i class="fas fa-home"></i></button>
-                            <span class="level-badge">STAGE</span>
-                            <h1 id="currentStage">1</h1>
-                        </div>
-
-                        <div class="top-controls">
-                            <div class="score-display">
-                                <i class="fas fa-star"></i>
-                                <span id="scoreValue">0</span>
-                            </div>
-                        </div>
-
-                        <button class="icon-btn" id="hintBtn" title="힌트">
-                            <i class="fas fa-lightbulb"></i>
-                            <span class="count" id="hintCount">3</span>
-                        </button>
-                    </header>
-
-                    <!-- Collector Bar (Slots for selected tiles) -->
-                    <div id="collectorContainer">
-                        <div class="collector-label">수사 증거 보관함</div>
-                        <div id="collectorBar">
-                            <div class="slot-empty"></div>
-                            <div class="slot-empty"></div>
-                            <div class="slot-empty"></div>
-                            <div class="slot-empty"></div>
-                        </div>
-                    </div>
-
-                    <!-- Play Area -->
-                    <main class="mahjong-area">
-                        <div id="mahjongBoard" class="layout-container">
-                            <!-- Tiles will be dynamically generated in layers -->
-                        </div>
-                    </main>
-
-                    <!-- Footer: Items & Skills -->
-                    <footer class="game-footer">
-                        <div class="item-bar">
-                            <button class="skill-btn" id="footerShuffleBtn">
-                                <div class="icon-circle">
-                                    <i class="fas fa-random"></i>
-                                    <span class="count" id="shuffleCount">2</span>
-                                </div>
-                                <span>셔플</span>
-                            </button>
-                            <button class="skill-btn" id="footerUndoBtn">
-                                <div class="icon-circle">
-                                    <i class="fas fa-undo"></i>
-                                    <span class="count" id="undoCount">3</span>
-                                </div>
-                                <span>되돌리기</span>
-                            </button>
-                            <button class="skill-btn" id="footerBombBtn">
-                                <div class="icon-circle">
-                                    <i class="fas fa-bomb"></i>
-                                    <span class="count" id="bombCount">1</span>
-                                </div>
-                                <span>폭탄</span>
-                            </button>
-                        </div>
-
-                        <div class="character-box">
-                            <div class="char-avatar" id="activeChar">🐰</div>
-                            <div class="char-msg" id="dialogueText">"닉! 저쪽 타일들 좀 확인해봐!"</div>
-                        </div>
-                    </footer>
                 </div>
             </div>
 
-            <!-- Firebase Scripts -->
-            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-            <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-            <script src="firebase-config.js"></script>
-            <script src="mahjong-game.js"></script>
-            <script src="nonogram-logic.js"></script>
+            <!-- Nonogram (Circuit Repair) Screen -->
+            <div id="nonogramGameScreen" class="screen hidden">
+                <div class="lab-layout">
+                    <!-- Left Info Panel -->
+                    <div class="info-panel">
+                        <div class="badge-mini">LOG: V-40053</div>
+                        <h1>회로 복구 모듈</h1>
+                        <p>회로 기판의 에너지 흐름(숫자 힌트)이 정상화되도록 전력 모듈을 배치하여 수리하십시오.</p>
+
+                        <div class="controls-hint">
+                            <p><i class="fas fa-mouse-pointer"></i> <b>클릭:</b> 부품 선택 / 배치</p>
+                            <p><i class="fas fa-redo"></i> <b>R 키:</b> 부품 회전</p>
+                            <p><i class="fas fa-times"></i> <b>우클릭:</b> 배치 취소</p>
+                        </div>
+
+                        <button class="sub-btn back-btn" id="nonogramBackBtn"><i class="fas fa-arrow-left"></i> 본부
+                            복귀</button>
+                    </div>
+
+                    <!-- Central Grid -->
+                    <div class="puzzle-core">
+                        <div class="grid-wrapper">
+                            <div id="colHints" class="hint-col"></div>
+                            <div id="rowHints" class="hint-row"></div>
+                            <div id="mainGrid" class="grid-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Inventory -->
+                    <div class="inventory-panel">
+                        <h3>확보된 수사 증거</h3>
+                        <div id="blockList" class="block-list"></div>
+                        <button class="btn-action" id="resetBtn"><i class="fas fa-sync"></i> 회로 초기화</button>
+                    </div>
+                </div>
+
+                <!-- Win Screen (Integrated) -->
+                <div id="winOverlay">
+                    <div class="win-content">
+                        <h1>REPAIRED</h1>
+                        <p>회로가 성공적으로 복구되었습니다.</p>
+                        <button class="main-btn" id="nextLevelBtn">다음 사건 수사하기</button>
+                    </div>
+                </div>
+                <!-- Ghost Preview -->
+                <div id="ghostBlock"></div>
+            </div>
+
+            <!-- Start Screen (Lobby) - Now treated as Mahjong Specific Lobby -->
+            <div id="startScreen" class="screen hidden">
+                <!-- (Existing Mahjong Lobby Content) -->
+                <div class="logo-area">
+                    <div class="badge-mini">경찰 기록 제2026호</div>
+                    <h1>마작 <span class="highlight">마스터</span></h1>
+                    <p class="subtitle">도시 추격전 • 수사 모듈 01</p>
+                </div>
+
+                <div class="hero-presentation">
+                    <div class="hero-unit judy">
+                        <div class="hero-avatar">🐰</div>
+                        <div class="hero-info">
+                            <span class="tag">수사관</span>
+                            <span class="name">주디 홉스</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-actions">
+                    <button id="startGameBtn" class="main-btn">
+                        <i class="fas fa-play"></i> 수사 개시 (Stage 1)
+                    </button>
+                    <button class="sub-btn" id="backToPlatformBtn">
+                        <i class="fas fa-arrow-left"></i> 본부로 돌아가기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ranking Screen -->
+            <div id="rankingScreen" class="screen hidden">
+                <div class="ranking-header">
+                    <h2>🏆 주토피아 명예 전당</h2>
+                    <button class="close-btn" id="closeRankingBtn"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="ranking-list" id="rankingList">
+                    <!-- Rankings will be loaded here -->
+                    <div class="loading">수사 기록을 불러오는 중...</div>
+                </div>
+            </div>
+
+            <!-- Game Over Modal -->
+            <div id="gameOverModal" class="screen hidden">
+                <div class="modal-content">
+                    <div class="modal-icon">🚨</div>
+                    <h2>수사 중단!</h2>
+                    <p class="modal-msg">보관함이 꽉 차서 더 이상 단서를 찾을 수 없습니다.</p>
+
+                    <div class="final-stats">
+                        <div class="stat-box">
+                            <span class="label">최종 점수</span>
+                            <span class="value" id="finalScore">0</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="label">도달 스테이지</span>
+                            <span class="value" id="finalStage">1</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="main-btn restart-btn" id="restartGameBtn">
+                            <i class="fas fa-redo"></i> 다시 도전하기
+                        </button>
+                        <button class="sub-btn home-btn" id="modalHomeBtn">
+                            <i class="fas fa-home"></i> 홈 화면으로
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Modal -->
+            <div id="helpModal" class="screen hidden">
+                <div class="modal-content help-content">
+                    <div class="ranking-header">
+                        <h2>🔍 수사 가이드</h2>
+                        <button class="close-btn" id="closeHelpBtn"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <div class="help-scroll-area">
+                        <div class="help-section">
+                            <h3><i class="fas fa-puzzle-piece"></i> 기본 규칙</h3>
+                            <p>동일한 모양의 단서(타일)를 <strong>2개</strong> 선택하면 증거가 확보되어 제거됩니다.</p>
+                            <p>타일은 양옆이 비어있거나 위에 다른 타일이 없을 때만 선택할 수 있습니다.</p>
+                        </div>
+
+                        <div class="help-section">
+                            <h3><i class="fas fa-briefcase"></i> 증거 보관함</h3>
+                            <p>선택한 타일은 상단 보관함으로 이동합니다. 보관함 <strong>4칸</strong>이 꽉 차고 더 이상 맞출 짝이 없으면 수사가 중단(게임오버)됩니다.
+                            </p>
+                        </div>
+
+                        <div class="help-section">
+                            <h3><i class="fas fa-magic"></i> 특수 아이템</h3>
+                            <ul class="help-list">
+                                <li><i class="fas fa-random"></i> <strong>셔플:</strong> 모든 타일의 위치를 무작위로 재배치합니다.</li>
+                                <li><i class="fas fa-undo"></i> <strong>되돌리기:</strong> 마지막 행동을 취소합니다.</li>
+                                <li><i class="fas fa-bomb"></i> <strong>폭탄:</strong> 보관함에 있는 모든 타일을 즉시 제거합니다.</li>
+                                <li><i class="fas fa-lightbulb"></i> <strong>힌트:</strong> 맞출 수 있는 짝 하나를 강조 표시합니다.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button class="main-btn" id="helpConfirmBtn">알겠습니다!</button>
+                </div>
+            </div>
+
+            <!-- Settings Modal (수사 도구) -->
+            <div id="settingsModal" class="screen hidden">
+                <div class="modal-content settings-content">
+                    <div class="ranking-header">
+                        <h2>⚙️ 수사 도구 설정</h2>
+                        <button class="close-btn" id="closeSettingsBtn"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <div class="settings-scroll-area">
+                        <!-- 1. 오디오 설정 -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-volume-up"></i> 오디오 피드백</h3>
+                            <div class="setting-item">
+                                <span>배경음악 (BGM)</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="bgmToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <span>효과음 (SFX)</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="sfxToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 3. 언어 및 데이터 -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-language"></i> 시스템 구성</h3>
+                            <div class="setting-item">
+                                <span>수사 언어 (Language)</span>
+                                <select id="languageSelect" class="setting-select">
+                                    <option value="ko">한국어 (KO)</option>
+                                    <option value="en">English (EN)</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <span>수사 기록 초기화</span>
+                                <button class="danger-btn-mini" id="resetDataBtn">기록 삭제</button>
+                            </div>
+                        </div>
+
+                        <!-- 4. 파트너 테마 -->
+                        <div class="settings-group">
+                            <h3><i class="fas fa-user-friends"></i> 수사 파트너 설정</h3>
+                            <div class="partner-selector">
+                                <label class="partner-option">
+                                    <input type="radio" name="partner" value="judy" checked>
+                                    <div class="partner-card">
+                                        <span class="emoji">🐰</span>
+                                        <span class="label">주디</span>
+                                    </div>
+                                </label>
+                                <label class="partner-option">
+                                    <input type="radio" name="partner" value="nick">
+                                    <div class="partner-card">
+                                        <span class="emoji">🦊</span>
+                                        <span class="label">닉</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="main-btn" id="settingsConfirmBtn">설정 저장</button>
+                </div>
+            </div>
+
+            <!-- 6. Mahjong Game Screen (The actual gameplay) -->
+            <div id="mahjongGameScreen" class="screen hidden">
+                <!-- Header -->
+                <header class="game-header">
+                    <div class="stage-info">
+                        <button class="icon-btn-small" id="homeBtn" title="홈으로"><i class="fas fa-home"></i></button>
+                        <span class="level-badge">STAGE</span>
+                        <h1 id="currentStage">1</h1>
+                    </div>
+
+                    <div class="top-controls">
+                        <div class="score-display">
+                            <i class="fas fa-star"></i>
+                            <span id="scoreValue">0</span>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn" id="hintBtn" title="힌트">
+                        <i class="fas fa-lightbulb"></i>
+                        <span class="count" id="hintCount">3</span>
+                    </button>
+                </header>
+
+                <!-- Collector Bar (Slots for selected tiles) -->
+                <div id="collectorContainer">
+                    <div class="collector-label">수사 증거 보관함</div>
+                    <div id="collectorBar">
+                        <div class="slot-empty"></div>
+                        <div class="slot-empty"></div>
+                        <div class="slot-empty"></div>
+                        <div class="slot-empty"></div>
+                    </div>
+                </div>
+
+                <!-- Play Area -->
+                <main class="mahjong-area">
+                    <div id="mahjongBoard" class="layout-container">
+                        <!-- Tiles will be dynamically generated in layers -->
+                    </div>
+                </main>
+
+                <!-- Footer: Items & Skills -->
+                <footer class="game-footer">
+                    <div class="item-bar">
+                        <button class="skill-btn" id="footerShuffleBtn">
+                            <div class="icon-circle">
+                                <i class="fas fa-random"></i>
+                                <span class="count" id="shuffleCount">2</span>
+                            </div>
+                            <span>셔플</span>
+                        </button>
+                        <button class="skill-btn" id="footerUndoBtn">
+                            <div class="icon-circle">
+                                <i class="fas fa-undo"></i>
+                                <span class="count" id="undoCount">3</span>
+                            </div>
+                            <span>되돌리기</span>
+                        </button>
+                        <button class="skill-btn" id="footerBombBtn">
+                            <div class="icon-circle">
+                                <i class="fas fa-bomb"></i>
+                                <span class="count" id="bombCount">1</span>
+                            </div>
+                            <span>폭탄</span>
+                        </button>
+                    </div>
+
+                    <div class="character-box">
+                        <div class="char-avatar" id="activeChar">🐰</div>
+                        <div class="char-msg" id="dialogueText">"닉! 저쪽 타일들 좀 확인해봐!"</div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- Firebase Scripts -->
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+        <script src="firebase-config.js"></script>
+        <script src="mahjong-game.js"></script>
+        <script src="nonogram-logic.js"></script>
 </body>
 
 </html>

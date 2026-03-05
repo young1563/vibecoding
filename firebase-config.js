@@ -14,8 +14,18 @@ const firebaseConfig = {
 var database;
 if (typeof firebase !== 'undefined') {
     try {
+        // Only initialize database if the URL is valid and not a placeholder
+        const isValidUrl = firebaseConfig.databaseURL &&
+            firebaseConfig.databaseURL.startsWith('https://') &&
+            firebaseConfig.databaseURL !== "YOUR_DATABASE_URL";
+
         firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
+
+        if (isValidUrl) {
+            database = firebase.database();
+        } else {
+            console.warn("Firebase Database URL is not configured. Local fallback will be used.");
+        }
     } catch (e) {
         console.error("Firebase initialization failed:", e);
     }

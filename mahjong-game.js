@@ -70,10 +70,6 @@ class MahjongGame {
     init() {
         this.landingHome.classList.remove('hidden');
         this.startScreen.classList.add('hidden');
-        this.gameHeader.classList.add('hidden');
-        this.gameFooter.classList.add('hidden');
-        this.mahjongArea.classList.add('hidden');
-        this.collectorContainer.classList.add('hidden');
         this.nonogramScreen.classList.add('hidden');
         this.mahjongGameScreen.classList.add('hidden');
 
@@ -131,6 +127,12 @@ class MahjongGame {
         this.landingHome.classList.add('hidden');
         this.startScreen.classList.add('hidden');
         this.mahjongGameScreen.classList.remove('hidden');
+
+        // Ensure game sub-elements are visible
+        this.gameHeader.classList.remove('hidden');
+        this.gameFooter.classList.remove('hidden');
+        this.mahjongArea.classList.remove('hidden');
+        this.collectorContainer.classList.remove('hidden');
 
         this.collector = [];
         this.renderCollector();
