@@ -123,20 +123,23 @@ class MahjongGame {
     }
 
     startGame() {
+        console.log("Launching Mahjong Master...");
         this.landingHome.classList.add('hidden');
         this.startScreen.classList.add('hidden');
+        this.nonogramScreen.classList.add('hidden');
         this.mahjongGameScreen.classList.remove('hidden');
 
-        // Ensure game sub-elements are visible
-        this.gameHeader.classList.remove('hidden');
-        this.gameFooter.classList.remove('hidden');
-        this.mahjongArea.classList.remove('hidden');
-        this.collectorContainer.classList.remove('hidden');
-
+        // Reset state
         this.collector = [];
         this.renderCollector();
-        this.createStage();
-        this.sayMsg("주디", "상단 보관함에 4개가 꽉 차면 안 돼! 신중하게 골라줘.");
+
+        // Small delay to ensure DOM reflow (prevents 0-size container bug)
+        setTimeout(() => {
+            this.createStage();
+            this.updateUI();
+            this.sayMsg("주디", "상단 보관함에 4개가 꽉 차면 안 돼! 신중하게 골라줘.");
+            this.updatePlatformUI();
+        }, 50);
     }
 
     goToLobby() {
@@ -240,8 +243,10 @@ class MahjongGame {
 
         const boardW = maxX - minX;
         const boardH = maxY - minY;
-        const containerW = this.boardElement.clientWidth || 800;
-        const containerH = this.boardElement.clientHeight || 500;
+        const containerW = this.boardElement.offsetWidth || this.boardElement.clientWidth || 800;
+        const containerH = this.boardElement.offsetHeight || this.boardElement.clientHeight || 500;
+
+        console.log(`Board Size: ${boardW}x${boardH}, Container Size: ${containerW}x${containerH}`);
 
         // Calculate Scale to fit (Increased coverage to 96%)
         const scaleX = (containerW * 0.96) / boardW;
@@ -584,6 +589,9 @@ class MahjongGame {
 
         // 1. Always attempt Firebase save if valid
         const isFirebaseValid = typeof database !== 'undefined' &&
+            database &&
+            database.app &&
+            database.app.options &&
             database.app.options.databaseURL &&
             database.app.options.databaseURL !== "YOUR_DATABASE_URL";
 
@@ -612,6 +620,9 @@ class MahjongGame {
         this.rankingList.innerHTML = '<div class="loading">수사 기록을 불러오는 중...</div>';
 
         const isFirebaseValid = typeof database !== 'undefined' &&
+            database &&
+            database.app &&
+            database.app.options &&
             database.app.options.databaseURL &&
             database.app.options.databaseURL !== "YOUR_DATABASE_URL";
 

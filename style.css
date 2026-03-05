@@ -61,6 +61,11 @@ body {
     flex-direction: column;
 }
 
+/* Common Utilities */
+.hidden:not(.screen) {
+    display: none !important;
+}
+
 /* Screen Strategy */
 .screen {
     position: absolute;
