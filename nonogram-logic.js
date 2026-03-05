@@ -18,14 +18,15 @@ class NonogramGame {
         this.lastHoveredCellEl = null;
         this.mousePos = { x: 0, y: 0 };
         this.isDragging = false;
-
-        this.init();
+        this.isInitialized = false;
     }
 
     async init() {
+        if (this.isInitialized) return;
         await this.loadLevels();
         this.setupLevel(0);
         this.setupEvents();
+        this.isInitialized = true;
     }
 
     async loadLevels() {
@@ -61,9 +62,13 @@ class NonogramGame {
         this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
 
         // Update UI Text
-        document.querySelector('h1').innerText = levelData.title;
-        document.querySelector('.info-panel p').innerText = levelData.description;
-        document.querySelector('.badge-mini').innerText = `LEVEL: ${levelData.id}`;
+        const titleEl = document.querySelector('#nonogramGameScreen h1');
+        const descEl = document.querySelector('#nonogramGameScreen .info-panel p');
+        const badgeEl = document.querySelector('#nonogramGameScreen .badge-mini');
+
+        if (titleEl) titleEl.innerText = levelData.title;
+        if (descEl) descEl.innerText = levelData.description;
+        if (badgeEl) badgeEl.innerText = `LEVEL: ${levelData.id}`;
 
         // Reset game state
         this.selectedIdx = -1;
@@ -367,6 +372,13 @@ class NonogramGame {
             if (this.currentLevelIdx < this.levels.length - 1) {
                 winTitle.innerText = "REPAIRED";
                 winMsg.innerText = "회로가 성공적으로 복구되었습니다. 다음 레벨로 이동하시겠습니까?";
+
+                // --- Platform Rewards ---
+                if (window.game && window.game.addPlatformStars) {
+                    window.game.addPlatformStars(150);
+                    window.game.addPlatformExp(300);
+                }
+
                 nextBtn.innerText = "다음 사건 수사하기";
                 nextBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -375,10 +387,13 @@ class NonogramGame {
             } else {
                 winTitle.innerText = "MISSION COMPLETE";
                 winMsg.innerText = "모든 특별 사건을 해결했습니다! 본부의 주디와 닉에게 보고하세요.";
-                nextBtn.innerText = "본부 복귀";
                 nextBtn.onclick = (e) => {
                     e.stopPropagation();
-                    location.href = 'index.html';
+                    if (window.game && window.game.goToPlatform) {
+                        window.game.goToPlatform();
+                    } else {
+                        location.href = 'index.html';
+                    }
                 };
             }
         }
@@ -410,5 +425,3 @@ class NonogramGame {
         document.getElementById('resetBtn').onclick = () => this.setupLevel(this.currentLevelIdx);
     }
 }
-
-window.onload = () => new NonogramGame();

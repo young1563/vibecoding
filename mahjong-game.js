@@ -10,6 +10,7 @@ class MahjongGame {
         this.dialogueText = document.getElementById('dialogueText');
         this.avatarText = document.getElementById('activeChar');
 
+        this.landingHome = document.getElementById('platformLanding') || document.getElementById('platformHome');
         this.startScreen = document.getElementById('startScreen');
         this.rankingScreen = document.getElementById('rankingScreen');
         this.rankingList = document.getElementById('rankingList');
@@ -26,6 +27,10 @@ class MahjongGame {
         this.finalScoreText = document.getElementById('finalScore');
         this.finalStageText = document.getElementById('finalStage');
 
+        this.nonogramScreen = document.getElementById('nonogramGameScreen');
+        this.mahjongGameScreen = document.getElementById('mahjongGameScreen');
+        this.nonogramInstance = null;
+
         this.stage = 1;
         this.score = 0;
         this.tiles = [];
@@ -35,6 +40,23 @@ class MahjongGame {
         this.hintCount = 3; // New: Initialize hint count
         this.shuffleCount = 2; // New: Initialize shuffle count
         this.undoCount = 3;    // New: Initialize undo count
+
+        // --- Platform Global Data ---
+        this.platformData = {
+            stars: parseInt(localStorage.getItem('zib_stars')) || 1250,
+            exp: parseInt(localStorage.getItem('zib_exp')) || 0,
+            level: parseInt(localStorage.getItem('zib_level')) || 1,
+            playerName: localStorage.getItem('zootopia_user_name') || "주디 홉스",
+            quests: JSON.parse(localStorage.getItem('zib_quests')) || {
+                mahjongMatches: { current: 0, target: 20, reward: 200, completed: false }
+            }
+        };
+
+        this.shopModal = document.getElementById('shopModal');
+        this.starsDisplay = document.getElementById('platformStars');
+        this.levelDisplay = document.querySelector('.player-rank');
+        this.nameDisplay = document.querySelector('.player-name');
+        this.questMahjongProgress = document.getElementById('questMahjongProgress');
 
         this.tileSymbols = [
             '🐰', '🦊', '👮', '🥕', '🍩', '🚔', '🦥', '🦁',
@@ -46,21 +68,67 @@ class MahjongGame {
     }
 
     init() {
+        this.landingHome.classList.remove('hidden');
+        this.startScreen.classList.add('hidden');
         this.gameHeader.classList.add('hidden');
         this.gameFooter.classList.add('hidden');
         this.mahjongArea.classList.add('hidden');
         this.collectorContainer.classList.add('hidden');
+        this.nonogramScreen.classList.add('hidden');
+        this.mahjongGameScreen.classList.add('hidden');
 
         this.setupControls();
+        this.updatePlatformUI(); // Sync global stats to UI
         this.updateUI();
     }
 
+    updatePlatformUI() {
+        if (this.starsDisplay) this.starsDisplay.innerText = this.platformData.stars.toLocaleString();
+        if (this.nameDisplay) this.nameDisplay.innerText = `${this.platformData.playerName} 수사관`;
+
+        // Calculate title based on level
+        const titles = ["Trainee", "Junior Detective", "Senior Detective", "Chief Inspector", "Commissioner"];
+        const titleIdx = Math.min(Math.floor((this.platformData.level - 1) / 5), titles.length - 1);
+        if (this.levelDisplay) this.levelDisplay.innerText = `LV.${this.platformData.level} ${titles[titleIdx]}`;
+
+        // Day Quest UI
+        if (this.questMahjongProgress) {
+            const q = this.platformData.quests.mahjongMatches;
+            const percent = Math.min((q.current / q.target) * 100, 100);
+            this.questMahjongProgress.style.width = `${percent}%`;
+
+            if (q.current >= q.target && !q.completed) {
+                q.completed = true;
+                this.addPlatformStars(q.reward);
+                this.sayMsg("주디", `오늘의 지령 완료! 보급품(${q.reward} 별)이 지급됐어.`);
+            }
+        }
+
+        // Persistence
+        localStorage.setItem('zib_stars', this.platformData.stars);
+        localStorage.setItem('zib_exp', this.platformData.exp);
+        localStorage.setItem('zib_level', this.platformData.level);
+        localStorage.setItem('zib_quests', JSON.stringify(this.platformData.quests));
+    }
+
+    addPlatformExp(amount) {
+        this.platformData.exp += amount;
+        const nextLevelExp = this.platformData.level * 1000;
+        if (this.platformData.exp >= nextLevelExp) {
+            this.platformData.level++;
+            this.platformData.exp -= nextLevelExp;
+            this.sayMsg("주디", `축하해! 수사관 등급이 LV.${this.platformData.level}로 승급됐어!`);
+        }
+        this.updatePlatformUI();
+    }
+
+    addPlatformStars(amount) {
+        this.platformData.stars += amount;
+        this.updatePlatformUI();
+    }
+
     startGame() {
-        this.startScreen.classList.add('hidden');
-        this.gameHeader.classList.remove('hidden');
-        this.gameFooter.classList.remove('hidden');
-        this.mahjongArea.classList.remove('hidden');
-        this.collectorContainer.classList.remove('hidden');
+        this.mahjongGameScreen.classList.remove('hidden');
 
         this.collector = [];
         this.renderCollector();
@@ -69,11 +137,10 @@ class MahjongGame {
     }
 
     goToLobby() {
+        this.landingHome.classList.add('hidden');
         this.startScreen.classList.remove('hidden');
-        this.gameHeader.classList.add('hidden');
-        this.gameFooter.classList.add('hidden');
-        this.mahjongArea.classList.add('hidden');
-        this.collectorContainer.classList.add('hidden');
+        this.nonogramScreen.classList.add('hidden');
+        this.mahjongGameScreen.classList.add('hidden');
 
         // Reset game state for a clean start next time
         this.stage = 1;
@@ -87,9 +154,27 @@ class MahjongGame {
         this.renderCollector();
     }
 
+    launchNonogram() {
+        this.landingHome.classList.add('hidden');
+        this.nonogramScreen.classList.remove('hidden');
+
+        if (!this.nonogramInstance) {
+            this.nonogramInstance = new NonogramGame();
+        }
+        this.nonogramInstance.init();
+    }
+
+    goToPlatform() {
+        this.landingHome.classList.remove('hidden');
+        this.startScreen.classList.add('hidden');
+        this.nonogramScreen.classList.add('hidden');
+        this.mahjongGameScreen.classList.add('hidden');
+        this.gameOverModal.classList.add('hidden');
+    }
+
     goHome() {
-        if (confirm("수사를 중단하고 본부(홈)로 돌아가시겠습니까? 현재 진행 상황은 저장되지 않습니다.")) {
-            this.goToLobby();
+        if (confirm("수사를 중단하고 플랫폼 홈으로 돌아가시겠습니까? 현재 진행 상황은 저장되지 않습니다.")) {
+            this.goToPlatform();
         }
     }
 
@@ -262,6 +347,13 @@ class MahjongGame {
                 });
 
                 this.score += 200 * this.stage;
+                this.addPlatformStars(10); // Reward stars for matches
+                this.addPlatformExp(50);   // Reward EXP
+
+                // Update Quest
+                this.platformData.quests.mahjongMatches.current++;
+                this.updatePlatformUI();
+
                 this.updateUI();
                 this.sayMsg("주디", "빙고! 증거물 매칭 성공!");
 
@@ -361,6 +453,8 @@ class MahjongGame {
 
         if (remainingOnBoard === 0 && this.collector.length === 0) {
             this.saveScore();
+            this.addPlatformStars(100 * this.stage); // Big bonus for clearing
+            this.addPlatformExp(500);
             this.stage++;
             this.sayMsg("주디", "와! 정말 대단해! 모든 증거를 수집했어.");
             setTimeout(() => {
@@ -529,30 +623,120 @@ class MahjongGame {
     }
 
     setupControls() {
+        const hMahjong = document.getElementById('heroLaunchMahjongBtn');
+        if (hMahjong) hMahjong.onclick = () => this.startGame();
+
+        const lMahjong = document.getElementById('launchMahjongBtn');
+        if (lMahjong) lMahjong.onclick = () => this.startGame();
+
+        const lNonogram = document.getElementById('launchNonogramBtn');
+        if (lNonogram) lNonogram.onclick = () => this.launchNonogram();
+
+        const hNonogram = document.getElementById('heroLaunchNonogramBtn');
+        if (hNonogram) hNonogram.onclick = () => this.launchNonogram();
+
+        const nBackBtn = document.getElementById('nonogramBackBtn');
+        if (nBackBtn) nBackBtn.onclick = () => this.goToPlatform();
+
         const startBtn = document.getElementById('startGameBtn');
         if (startBtn) startBtn.onclick = () => this.startGame();
-        document.getElementById('showRankingBtn').onclick = () => { this.rankingScreen.classList.remove('hidden'); this.loadRankings(); };
-        document.getElementById('closeRankingBtn').onclick = () => this.rankingScreen.classList.add('hidden');
+
+        const pRanking = document.getElementById('showPlatformRankingBtn');
+        if (pRanking) pRanking.onclick = () => { this.rankingScreen.classList.remove('hidden'); this.loadRankings(); };
+
+        const pSettings = document.getElementById('showPlatformSettingsBtn');
+        if (pSettings) pSettings.onclick = () => this.settingsModal.classList.remove('hidden');
+
+        const shopBtn = document.getElementById('showShopBtn');
+        if (shopBtn) shopBtn.onclick = () => this.shopModal.classList.remove('hidden');
+
+        // Sidebar Links
+        const sRanking = document.getElementById('sideRankingBtn');
+        if (sRanking) sRanking.onclick = () => { this.rankingScreen.classList.remove('hidden'); this.loadRankings(); };
+
+        const sShop = document.getElementById('sideShopBtn');
+        if (sShop) sShop.onclick = () => this.shopModal.classList.remove('hidden');
+
+        const sSettings = document.getElementById('sideSettingsBtn');
+        if (sSettings) sSettings.onclick = () => this.settingsModal.classList.remove('hidden');
+
+        const cShopBtn = document.getElementById('closeShopBtn');
+        if (cShopBtn) cShopBtn.onclick = () => this.shopModal.classList.add('hidden');
+
+        // Category Tabs Interactivity
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.onclick = () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            };
+        });
+
+        // Shop Purchase Logic
+        const buyBtns = document.querySelectorAll('.buy-btn');
+        buyBtns.forEach(btn => {
+            btn.onclick = (e) => {
+                const itemCard = e.target.closest('.shop-item');
+                const type = itemCard.dataset.item;
+                const price = parseInt(itemCard.dataset.price);
+
+                if (this.platformData.stars >= price) {
+                    this.platformData.stars -= price;
+                    this.buyItem(type);
+                    this.updatePlatformUI();
+                    this.updateUI();
+                    this.sayMsg("닉", "좋은 선택이야 수사관. 장비함에 잘 넣어뒀어.");
+                } else {
+                    this.sayMsg("주디", "별이 부족해서 구매할 수 없어. 수사를 더 진행해볼까?");
+                }
+            };
+        });
+
+        const showRankBtn = document.getElementById('showPlatformRankingBtn') || document.getElementById('showRankingBtn');
+        if (showRankBtn) showRankBtn.onclick = () => { this.rankingScreen.classList.remove('hidden'); this.loadRankings(); };
+
+        const closeRankBtn = document.getElementById('closeRankingBtn');
+        if (closeRankBtn) closeRankBtn.onclick = () => this.rankingScreen.classList.add('hidden');
 
         // Game Header Controls
-        document.getElementById('hintBtn').onclick = () => this.showHint();
-        document.getElementById('homeBtn').onclick = () => this.goHome();
+        const hintBtn = document.getElementById('hintBtn');
+        if (hintBtn) hintBtn.onclick = () => this.showHint();
+
+        const homeBtn = document.getElementById('homeBtn');
+        if (homeBtn) homeBtn.onclick = () => this.goHome();
 
         // Footer Skill Buttons
-        document.getElementById('footerShuffleBtn').onclick = () => this.shuffleTiles();
-        document.getElementById('footerUndoBtn').onclick = () => this.undoMove();
-        document.getElementById('footerBombBtn').onclick = () => this.useBomb();
+        const shuffleBtn = document.getElementById('footerShuffleBtn');
+        if (shuffleBtn) shuffleBtn.onclick = () => this.shuffleTiles();
+
+        const undoBtn = document.getElementById('footerUndoBtn');
+        if (undoBtn) undoBtn.onclick = () => this.undoMove();
+
+        const bombBtn = document.getElementById('footerBombBtn');
+        if (bombBtn) bombBtn.onclick = () => this.useBomb();
 
         // Help Modal Controls
-        document.getElementById('showHelpBtn').onclick = () => this.helpModal.classList.remove('hidden');
-        document.getElementById('closeHelpBtn').onclick = () => this.helpModal.classList.add('hidden');
-        document.getElementById('helpConfirmBtn').onclick = () => this.helpModal.classList.add('hidden');
+        const showHelpBtn = document.getElementById('showHelpBtn');
+        if (showHelpBtn) showHelpBtn.onclick = () => this.helpModal.classList.remove('hidden');
+
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+        if (closeHelpBtn) closeHelpBtn.onclick = () => this.helpModal.classList.add('hidden');
+
+        const helpConfirmBtn = document.getElementById('helpConfirmBtn');
+        if (helpConfirmBtn) helpConfirmBtn.onclick = () => this.helpModal.classList.add('hidden');
 
         // Settings Modal Controls
-        document.getElementById('showSettingsBtn').onclick = () => this.settingsModal.classList.remove('hidden');
-        document.getElementById('closeSettingsBtn').onclick = () => this.settingsModal.classList.add('hidden');
-        document.getElementById('settingsConfirmBtn').onclick = () => this.settingsModal.classList.add('hidden');
-        document.getElementById('resetDataBtn').onclick = () => {
+        const showSettingsBtn = document.getElementById('showPlatformSettingsBtn') || document.getElementById('showSettingsBtn');
+        if (showSettingsBtn) showSettingsBtn.onclick = () => this.settingsModal.classList.remove('hidden');
+
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        if (closeSettingsBtn) closeSettingsBtn.onclick = () => this.settingsModal.classList.add('hidden');
+
+        const settingsConfirmBtn = document.getElementById('settingsConfirmBtn');
+        if (settingsConfirmBtn) settingsConfirmBtn.onclick = () => this.settingsModal.classList.add('hidden');
+
+        const resetDataBtn = document.getElementById('resetDataBtn');
+        if (resetDataBtn) resetDataBtn.onclick = () => {
             if (confirm("모든 수사 기록과 설정이 초기화됩니다. 계속하시겠습니까?")) {
                 localStorage.clear();
                 alert("기록이 초기화되었습니다. 페이지를 새로고침합니다.");
@@ -561,13 +745,24 @@ class MahjongGame {
         };
 
         // Modal Buttons
-        document.getElementById('restartGameBtn').onclick = () => this.restartGame();
-        document.getElementById('modalHomeBtn').onclick = () => {
-            if (confirm("수사를 중단하고 본부(홈)로 돌아가시겠습니까?")) {
-                this.gameOverModal.classList.add('hidden');
-                this.goToLobby();
+        const restartBtn = document.getElementById('restartGameBtn');
+        if (restartBtn) restartBtn.onclick = () => this.restartGame();
+
+        const modalHomeBtn = document.getElementById('modalHomeBtn');
+        if (modalHomeBtn) modalHomeBtn.onclick = () => {
+            if (confirm("수사를 중단하고 플랫폼 홈으로 돌아가시겠습니까?")) {
+                this.goToPlatform();
             }
         };
+    }
+
+    buyItem(type) {
+        switch (type) {
+            case 'hint': this.hintCount += 3; break;
+            case 'bomb': this.bombCount += 1; break;
+            case 'shuffle': this.shuffleCount += 2; break;
+            case 'undo': this.undoCount += 3; break;
+        }
     }
 
     showHint() {
