@@ -82,10 +82,9 @@ class MahjongGame {
         if (this.starsDisplay) this.starsDisplay.innerText = this.platformData.stars.toLocaleString();
         if (this.nameDisplay) this.nameDisplay.innerText = `${this.platformData.playerName} 수사관`;
 
-        // Calculate title based on level
-        const titles = ["Trainee", "Junior Detective", "Senior Detective", "Chief Inspector", "Commissioner"];
-        const titleIdx = Math.min(Math.floor((this.platformData.level - 1) / 5), titles.length - 1);
-        if (this.levelDisplay) this.levelDisplay.innerText = `LV.${this.platformData.level} ${titles[titleIdx]}`;
+        // Target multiple level indicators for consistency
+        const platformLevelLabel = document.getElementById('platformLevel');
+        if (platformLevelLabel) platformLevelLabel.innerText = this.platformData.level;
 
         // Day Quest UI
         if (this.questMahjongProgress) {
@@ -160,6 +159,8 @@ class MahjongGame {
 
     launchNonogram() {
         this.landingHome.classList.add('hidden');
+        this.startScreen.classList.add('hidden');
+        this.mahjongGameScreen.classList.add('hidden');
         this.nonogramScreen.classList.remove('hidden');
 
         if (!this.nonogramInstance) {
