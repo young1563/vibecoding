@@ -4,7 +4,8 @@
  */
 
 class NonogramGame {
-    constructor() {
+    constructor(platform) {
+        this.platform = platform;
         this.size = 5;
         this.grid = [];
         this.answer = [];
@@ -374,9 +375,9 @@ class NonogramGame {
                 winMsg.innerText = "회로가 성공적으로 복구되었습니다. 다음 레벨로 이동하시겠습니까?";
 
                 // --- Platform Rewards ---
-                if (window.game && window.game.addPlatformStars) {
-                    window.game.addPlatformStars(150);
-                    window.game.addPlatformExp(300);
+                if (this.platform) {
+                    this.platform.addStars(150);
+                    this.platform.addExp(300);
                 }
 
                 nextBtn.innerText = "다음 사건 수사하기";
@@ -389,8 +390,8 @@ class NonogramGame {
                 winMsg.innerText = "모든 특별 사건을 해결했습니다! 본부의 주디와 닉에게 보고하세요.";
                 nextBtn.onclick = (e) => {
                     e.stopPropagation();
-                    if (window.game && window.game.goToPlatform) {
-                        window.game.goToPlatform();
+                    if (this.platform) {
+                        this.platform.switchScreen('home');
                     } else {
                         location.href = 'index.html';
                     }
