@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZIB: 마작 마스터</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: var(--bg-dark);
+        }
+
+        .gameplay-screen {
+            opacity: 1;
+            pointer-events: all;
+            transform: none;
+            position: relative;
+            display: flex;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Global Nav -->
+        <nav class="main-nav">
+            <div class="logo-section">
+                <a href="index.html"
+                    style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px;">
+                    <div class="logo-icon">ZPD</div>
+                    <div class="logo-text">
+                        <h1>주토피아 수사국</h1>
+                        <span>Case Hub</span>
+                    </div>
+                </a>
+            </div>
+            <div class="hud-pills">
+                <div class="pill">
+                    <i class="fas fa-star"></i>
+                    <span id="appStars">0</span>
+                </div>
+            </div>
+        </nav>
+
+        <section id="mahjongScreen" class="gameplay-screen">
+            <header class="game-top-bar">
+                <a href="index.html" class="back-btn" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-arrow-left"></i> 본부로
+                </a>
+                <div id="mahjongHeaderStats" class="hud-pills">
+                    <div class="pill">STAGE <span id="currentStage">1</span></div>
+                    <div class="pill">SCORE <span id="scoreValue">0</span></div>
+                </div>
+                <div class="hud-pills">
+                    <button class="pill" id="footerShuffleBtn" data-tooltip="현장의 단서들을 무작위로 다시 섞습니다.">
+                        <i class="fas fa-random"></i>
+                        <div class="pill-info">
+                            <span class="pill-label">증거 재배치</span>
+                            <span class="pill-val" id="shuffleCount">2</span>
+                        </div>
+                    </button>
+                    <button class="pill" id="footerUndoBtn" data-tooltip="마지막으로 수집한 단서를 다시 보드로 되돌립니다.">
+                        <i class="fas fa-undo"></i>
+                        <div class="pill-info">
+                            <span class="pill-label">수사 되돌리기</span>
+                            <span class="pill-val" id="undoCount">3</span>
+                        </div>
+                    </button>
+                </div>
+            </header>
+
+            <div id="collectorContainer">
+                <div id="collectorBar"></div>
+            </div>
+
+            <main class="mahjong-area">
+                <div id="mahjongBoard"></div>
+            </main>
+
+            <footer class="game-footer" style="padding: 1rem; display: flex; justify-content: center; gap: 20px;">
+                <button class="pill" id="footerBombBtn" data-tooltip="수집 바를 모두 비워 여유 공간을 확보합니다.">
+                    <i class="fas fa-bomb"></i>
+                    <div class="pill-info">
+                        <span class="pill-label">증거 파괴</span>
+                        <span class="pill-val" id="bombCount">1</span>
+                    </div>
+                </button>
+                <button class="pill" id="hintBtn" data-tooltip="현재 수집 가능한 단서 한 쌍을 찾아냅니다.">
+                    <i class="fas fa-lightbulb"></i>
+                    <div class="pill-info">
+                        <span class="pill-label">추리 힌트</span>
+                        <span class="pill-val" id="hintCount">3</span>
+                    </div>
+                </button>
+            </footer>
+        </section>
+
+        <!-- Game Over Overlay -->
+        <div id="gameOverModal"
+            style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9000; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
+            <h1 style="font-size: 3rem; color: #FF2E63;">GAME OVER</h1>
+            <p id="finalStatsText" style="color: white;"></p>
+            <a href="index.html" class="launch-btn" style="width: 200px; text-decoration: none;">홈으로 가기</a>
+            <button class="launch-btn" onclick="location.reload()"
+                style="width: 200px; background: var(--grad-nick); color: white;">다시 도전</button>
+        </div>
+    </div>
+
+    <script src="platform-manager.js"></script>
+    <script src="game-mahjong.js"></script>
+    <script>
+        // Auto-start on load
+        window.addEventListener('load', () => {
+            if (!window.mahjongGame) window.mahjongGame = new MahjongGame(window.platform);
+            window.mahjongGame.start();
+        });
+    </script>
+</body>
+
+</html>

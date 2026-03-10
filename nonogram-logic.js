@@ -63,9 +63,9 @@ class NonogramGame {
         this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
 
         // Update UI Text
-        const titleEl = document.querySelector('#nonogramGameScreen h1');
-        const descEl = document.querySelector('#nonogramGameScreen .info-panel p');
-        const badgeEl = document.querySelector('#nonogramGameScreen .badge-mini');
+        const titleEl = document.querySelector('header h1');
+        const descEl = document.querySelector('.info-panel p');
+        const badgeEl = document.querySelector('.badge-mini');
 
         if (titleEl) titleEl.innerText = levelData.title;
         if (descEl) descEl.innerText = levelData.description;
@@ -390,11 +390,7 @@ class NonogramGame {
                 winMsg.innerText = "모든 특별 사건을 해결했습니다! 본부의 주디와 닉에게 보고하세요.";
                 nextBtn.onclick = (e) => {
                     e.stopPropagation();
-                    if (this.platform) {
-                        this.platform.switchScreen('home');
-                    } else {
-                        location.href = 'index.html';
-                    }
+                    location.href = 'index.html';
                 };
             }
         }

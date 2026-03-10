@@ -9,8 +9,8 @@ class MahjongGame {
         this.stageText = document.getElementById('currentStage');
         this.scoreText = document.getElementById('scoreValue');
         this.collectorBar = document.getElementById('collectorBar');
-        this.avatarText = document.getElementById('activeChar');
-        this.dialogueText = document.getElementById('dialogueText');
+        this.avatarText = document.getElementById('activeChar'); // Might be null on new page
+        this.dialogueText = document.getElementById('dialogueText'); // Might be null on new page
 
         // Sounds can be added here
         this.tileSymbols = [
@@ -138,24 +138,47 @@ class MahjongGame {
     checkMatch() {
         if (this.collector.length < 2) return;
 
-        // Match-2 Logic
-        const last = this.collector[this.collector.length - 1];
-        const prev = this.collector[this.collector.length - 2];
+        // Enhanced Match-2 Logic: Check if there's any pair in the entire collector
+        const counts = {};
+        this.collector.forEach(t => {
+            counts[t.symbol] = (counts[t.symbol] || 0) + 1;
+        });
 
-        if (last.symbol === prev.symbol) {
-            // Match found!
-            this.collector.splice(this.collector.length - 2, 2);
+        let matchSymbol = null;
+        for (let sym in counts) {
+            if (counts[sym] >= 2) {
+                matchSymbol = sym;
+                break;
+            }
+        }
+
+        if (matchSymbol) {
+            // Find the two matching tiles and remove them
+            let removedCount = 0;
+            const matchedTiles = [];
+            this.collector = this.collector.filter(t => {
+                if (t.symbol === matchSymbol && removedCount < 2) {
+                    removedCount++;
+                    matchedTiles.push(t);
+                    return false;
+                }
+                return true;
+            });
+
+            // Add flash effect to the matched tiles for visual impact
+            matchedTiles.forEach(t => t.element.classList.add('match-flash'));
+
             this.score += 100 * this.stage;
             this.platform.addStars(10);
-            this.platform.addExp(50);
-            this.showFloatingScore(`+${100 * this.stage}`, last.element.offsetLeft, last.element.offsetTop);
 
+            // Visual feedback
             setTimeout(() => {
                 this.renderCollector();
                 this.checkWin();
-            }, 300);
+            }, 400);
         } else if (this.collector.length >= this.collectorSize) {
-            this.gameOver();
+            // No matches and collector full = Game Over
+            setTimeout(() => this.gameOver(), 300);
         }
     }
 
@@ -169,9 +192,10 @@ class MahjongGame {
 
     gameOver() {
         this.platform.switchScreen('gameOver');
-        document.getElementById('finalScore').innerText = this.score;
-        document.getElementById('finalStage').innerText = this.stage;
-        this.saveFinalScore();
+        const statsEl = document.getElementById('finalStatsText');
+        if (statsEl) {
+            statsEl.innerText = `최종 점수: ${this.score.toLocaleString()} | 스테이지: ${this.stage}`;
+        }
     }
 
     saveFinalScore() {
@@ -183,12 +207,38 @@ class MahjongGame {
     }
 
     isBlocked(tile) {
-        return this.tiles.some(other =>
+        // A tile is blocked if:
+        // 1. There is ANY tile on a HIGHER layer (z) that overlaps it significantly
+        // or
+        // 2. Both its LEFT and RIGHT sides are blocked (Traditional Mahjong Solitaire)
+        // For our simplified "Match-2" casual version, we'll focus on the "Top Layer" rule + "Sides" rule.
+
+        const topBlocked = this.tiles.some(other =>
             !other.removed &&
             other.z > tile.z &&
             Math.abs(other.x - tile.x) < 40 &&
             Math.abs(other.y - tile.y) < 60
         );
+
+        if (topBlocked) return true;
+
+        // Sides Check (Traditional Rule: can move if either left or right is free)
+        const leftBlocked = this.tiles.some(other =>
+            !other.removed &&
+            other.z === tile.z &&
+            other.x < tile.x &&
+            Math.abs(other.x - tile.x) < 55 &&
+            Math.abs(other.y - tile.y) < 20
+        );
+        const rightBlocked = this.tiles.some(other =>
+            !other.removed &&
+            other.z === tile.z &&
+            other.x > tile.x &&
+            Math.abs(other.x - tile.x) < 55 &&
+            Math.abs(other.y - tile.y) < 20
+        );
+
+        return leftBlocked && rightBlocked;
     }
 
     renderCollector() {
@@ -212,7 +262,7 @@ class MahjongGame {
             this.platform.data.inventory.bomb--;
             this.collector = [];
             this.renderCollector();
-            this.platform.saveData();
+            this.platform.save();
             this.updateUI();
         }
     }
@@ -231,7 +281,7 @@ class MahjongGame {
                     const pair = pairs[sym].slice(0, 2);
                     pair.forEach(p => p.element.classList.add('hint'));
                     setTimeout(() => pair.forEach(p => p.element.classList.remove('hint')), 2000);
-                    this.platform.saveData();
+                    this.platform.save();
                     this.updateUI();
                     return;
                 }
@@ -249,7 +299,7 @@ class MahjongGame {
                 t.symbol = symbols[i];
                 t.element.innerText = t.symbol;
             });
-            this.platform.saveData();
+            this.platform.save();
             this.updateUI();
         }
     }
@@ -262,7 +312,7 @@ class MahjongGame {
             tile.element.classList.remove('hidden');
             this.renderCollector();
             this.checkBlockedStatus();
-            this.platform.saveData();
+            this.platform.save();
             this.updateUI();
         }
     }
@@ -303,7 +353,7 @@ class MahjongGame {
     }
 
     sayMsg(char, text) {
-        this.avatarText.innerText = char === "주디" ? "🐰" : "🦊";
-        this.dialogueText.innerText = `"${text}"`;
+        if (this.avatarText) this.avatarText.innerText = char === "주디" ? "🐰" : "🦊";
+        if (this.dialogueText) this.dialogueText.innerText = `"${text}"`;
     }
 }
